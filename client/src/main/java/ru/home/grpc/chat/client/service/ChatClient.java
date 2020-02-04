@@ -58,7 +58,12 @@ public class ChatClient {
 
     /** Construct client for accessing RouteGuide server using the existing channel. */
     public ChatClient(ManagedChannelBuilder<?> channelBuilder) {
-        channel = channelBuilder.build();
+
+        channel = channelBuilder
+            .keepAliveTime(10, TimeUnit.SECONDS)
+            .keepAliveTimeout(30, TimeUnit.SECONDS)
+            .keepAliveWithoutCalls(true) // provide surviving NAT translation timeout dropping
+            .build();
     }
 
 
@@ -67,15 +72,6 @@ public class ChatClient {
 
 
     public void start() {
-
-//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-//            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-//            System.err.println("*** shutting down gRPC client since JVM is shutting down");
-//            try {
-//                channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
-//            } catch (InterruptedException ignore) {}
-//            System.err.println("*** client shut down");
-//        }));
 
         blockingStub = ChatServiceGrpc.newBlockingStub(channel);
         asyncStub = ChatServiceGrpc.newStub(channel);

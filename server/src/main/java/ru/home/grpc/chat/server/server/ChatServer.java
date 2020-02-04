@@ -48,8 +48,7 @@ public class ChatServer {
 
         port = 8090;
         server = ServerBuilder.forPort(port)
-        .addService(ServerInterceptors.intercept(new ChatService(),
-            new HeaderInterceptor()))
+        .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))
             .build();
     }
 

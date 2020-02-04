@@ -17,6 +17,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_256;
 
@@ -34,6 +35,8 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
     private SecureRandom secureRandom;
 
     private AtomicLong idAtomic = new AtomicLong();
+
+    private ReentrantLock lock = new ReentrantLock();
 
     public ChatService() throws NoSuchAlgorithmException {
 
@@ -133,15 +136,25 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
 
 
     private void broadcast(ServerMessage serverMessage) {
-        // broadcast to all connected clients
-        for (Map.Entry<String, Client> entry : clientList.entrySet()) {
 
-            Client client = entry.getValue();
+        // StreamObserver not thread-safe
 
-            if (client.getResponseObserver() == null) {
-                continue;
+        try {
+            lock.lock();
+
+            // Synchronized broadcast to all connected clients
+            for (Map.Entry<String, Client> entry : clientList.entrySet()) {
+
+                Client client = entry.getValue();
+
+                if (client.getResponseObserver() == null) {
+                    continue;
+                }
+                client.getResponseObserver().onNext(serverMessage);
             }
-            client.getResponseObserver().onNext(serverMessage);
+        }
+        finally {
+            lock.unlock();
         }
     }
 
