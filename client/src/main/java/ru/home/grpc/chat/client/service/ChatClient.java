@@ -16,8 +16,6 @@
 
 package ru.home.grpc.chat.client.service;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.grpc.*;
 
 import io.grpc.stub.MetadataUtils;
@@ -28,10 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import ru.home.grpc.chat.*;
 
-import java.io.BufferedReader;
 import java.lang.invoke.MethodHandles;
-import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
@@ -50,14 +45,14 @@ public class ChatClient {
     private ChatServiceGrpc.ChatServiceBlockingStub blockingStub;
     private ChatServiceGrpc.ChatServiceStub asyncStub;
     private StreamObserver<ClientMessage> chat;
-    private String name;
+    private String login;
     private String password;
 
 
     /** Construct client for accessing RouteGuide server at {@code host:port}. */
     public ChatClient(String host, int port, String login, String password) {
         this(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
-        this.name = login;
+        this.login = login;
         this.password = password;
     }
 
@@ -86,9 +81,9 @@ public class ChatClient {
         asyncStub = ChatServiceGrpc.newStub(channel);
 
 
-        // getting client id (access token, etc) by "authenticate" yourself to server using name
+        // getting client id (access token, etc) by "authenticate" yourself to server using login
         AuthRequest authRequest = AuthRequest.newBuilder()
-            .setLogin(name)
+            .setLogin(login)
             .setPassword(password)
             .build();
 
