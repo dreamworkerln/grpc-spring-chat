@@ -18,14 +18,7 @@ import java.lang.invoke.MethodHandles;
 public class ClientStartupRunner implements ApplicationRunner {
 
     private static BufferedReader bufferIn;
-
     private final static Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    private final ApplicationContext context;
-
-    public ClientStartupRunner(ApplicationContext context) {
-        this.context = context;
-    }
 
 
     @Override
@@ -46,7 +39,7 @@ public class ClientStartupRunner implements ApplicationRunner {
 
 
         log.info("Connecting to server ...");
-        ChatClient client = context.getBean(ChatClient.class, "localhost", 8090, login, password);
+        ChatClient client = new ChatClient("localhost", 8090, login, password);
 
         client.start();
 
