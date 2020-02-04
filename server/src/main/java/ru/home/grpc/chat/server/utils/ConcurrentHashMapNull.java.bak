@@ -1,0 +1,45 @@
+package ru.home.grpc.chat.server.utils;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ConcurrentHashMapNull<K,V> {
+
+    private Map<K, V> list = new ConcurrentHashMap<>();
+
+
+    public void put(K key, V value) {
+
+        list.put(key, value);
+    }
+
+
+    public V get(K key) {
+
+        V result = null;
+
+        if (key != null) {
+            result = list.get(key);
+        }
+        return result;
+    }
+
+    public void remove(K key) {
+
+        if(key!= null) {
+
+            list.remove(key);
+        }
+
+    }
+
+    public Set<Map.Entry<K, V>> entrySet() {
+        return list.entrySet();
+    }
+
+
+    public boolean contains(K key) {
+        return list.containsKey(key);
+    }
+}
