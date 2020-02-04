@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 
 /**
- * A sample gRPC server that serve the RouteGuide (see chat.proto) service.
+ * A sample gRPC server that serve the Chat (see chat.proto) service.
  */
 @Service
 public class ChatServer {

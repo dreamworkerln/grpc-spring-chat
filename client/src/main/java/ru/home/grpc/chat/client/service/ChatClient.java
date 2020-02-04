@@ -49,14 +49,14 @@ public class ChatClient {
     private String password;
 
 
-    /** Construct client for accessing RouteGuide server at {@code host:port}. */
+    /** Construct client for accessing Chat server at {@code host:port}. */
     public ChatClient(String host, int port, String login, String password) {
         this(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
         this.login = login;
         this.password = password;
     }
 
-    /** Construct client for accessing RouteGuide server using the existing channel. */
+    /** Construct client for accessing Chat server using the existing channel. */
     public ChatClient(ManagedChannelBuilder<?> channelBuilder) {
 
         channel = channelBuilder
