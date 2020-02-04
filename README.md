@@ -4,7 +4,7 @@ Spring Boot grpc chat demo
 install  
 mvn -DskipTests clean package 
 
-In Intellij Idea after compile mark  
+For Intellij Idea after compile mark folder (in Project)  
 "grpc-spring-chat/shared-resources/target/generated-sources" as "Generated Sources Root"  
 
 client  
