@@ -41,11 +41,6 @@ public class ChatServer {
 
     public ChatServer() throws Exception {
 
-//        port = 8090;
-//        server = ServerBuilder.forPort(port)
-//            .addService(new ChatService())
-//            .build();
-
         port = 8090;
         server = ServerBuilder.forPort(port)
         .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))
