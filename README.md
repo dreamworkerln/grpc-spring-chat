@@ -2,5 +2,5 @@
 Spring Boot grpc chat demo  
 
 client  
-login: any  
+login:any  
 password:1  
