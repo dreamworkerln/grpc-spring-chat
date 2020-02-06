@@ -2,6 +2,8 @@
 # grpc-spring-chat  
 Spring Boot grpc chat demo
 
+![GUI](https://i.ibb.co/KFtWgGk/2020-02-07-02-29-15.png)
+
 #### 1. install spring-shell-lib   
 
 clone git@github.com:dreamworkerln/spring-shell-lib.git  
