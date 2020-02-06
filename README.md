@@ -13,7 +13,7 @@ mvn -DskipTests clean install
 cd grpc-spring-chat  
 mvn -DskipTests clean package  
 
-For Intellij Idea after compile mark folder (in Project)  
+For Intellij Idea after mvn compile mark folder (in Project)  
 "grpc-spring-chat/shared-resources/target/generated-sources" as "Generated Sources Root"  
 
 #### 3. run server and client  
@@ -45,7 +45,7 @@ channelBuilder
 &nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTimeout(20, TimeUnit.SECONDS)  
 &nbsp;&nbsp;&nbsp;&nbsp;.keepAliveWithoutCalls(true)  
             
-blockingStub.withDeadlineAfter  
+blockingStub.withDeadlineAfter(DEADLINE_DURATION, TimeUnit.MILLISECONDS)  
     
 dunno  
 asyncStub.withDeadlineAfter ?  
