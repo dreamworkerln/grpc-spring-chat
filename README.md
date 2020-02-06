@@ -5,7 +5,7 @@ Spring Boot grpc chat demo
 
 clone git@github.com:dreamworkerln/spring-shell-lib.git  
 cd spring-shell-lib  
-mvn -DskipTests clean install
+mvn -DskipTests clean install  
 
 
 ####2. package grpc-spring-chat  
@@ -17,8 +17,8 @@ For Intellij Idea after compile mark folder (in Project)
 
 ####3. run server and client  
    
-in client console run     
-shell:$ connect    
+in client console run  
+shell:$ connect  
 
   
 login:any  
