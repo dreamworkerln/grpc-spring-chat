@@ -4,7 +4,7 @@ Spring Boot grpc chat demo
 
 #### 1. install spring-shell-lib   
 
-clone [GitHub](git@github.com:dreamworkerln/spring-shell-lib.git) 
+clone https://github.com/dreamworkerln/spring-shell-lib
 cd spring-shell-lib  
 mvn -DskipTests clean install  
 
