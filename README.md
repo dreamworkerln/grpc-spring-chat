@@ -52,6 +52,6 @@ asyncStub.withDeadlineAfter ?
 
 
 
-![GUI](https://i.ibb.co/KFtWgGk/2020-02-07-02-29-15.png)
+![GUI](https://ibb.co/wMn4qLX)
    
                 
