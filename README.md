@@ -22,4 +22,30 @@ shell:$ connect
 
   
 login:any  
-password:1  
+password:1 
+
+used:
+
+server:  
+NettyServerBuilder  
+                 .permitKeepAliveWithoutCalls(true)  
+                 .permitKeepAliveTime(5, TimeUnit.SECONDS)  
+  
+authentication via loginpassword / token in message header  
+
+
+
+client:  
+  
+  channelBuilder  
+            .keepAliveTime(10, TimeUnit.SECONDS)  
+            .keepAliveTimeout(20, TimeUnit.SECONDS)  
+            .keepAliveWithoutCalls(true)  
+            
+  using  
+    blockingStub.withDeadlineAfter  
+    
+  dunno  
+    asyncStub.withDeadlineAfter ?  
+    
+                
