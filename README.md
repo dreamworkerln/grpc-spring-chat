@@ -4,7 +4,7 @@ Spring Boot grpc chat demo
 
 #### 1. install spring-shell-lib   
 
-clone git@github.com:dreamworkerln/spring-shell-lib.git  
+clone [GitHub](git@github.com:dreamworkerln/spring-shell-lib.git) 
 cd spring-shell-lib  
 mvn -DskipTests clean install  
 
@@ -52,6 +52,6 @@ asyncStub.withDeadlineAfter ?
 
 
 
-![GUI](https://ibb.co/wMn4qLX)
+![GUI](https://i.ibb.co/KFtWgGk/2020-02-07-02-29-15.png)
    
                 
