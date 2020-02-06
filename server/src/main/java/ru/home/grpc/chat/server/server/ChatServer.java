@@ -19,6 +19,7 @@ package ru.home.grpc.chat.server.server;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
+import io.grpc.netty.NettyServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,10 @@ import ru.home.grpc.chat.server.service.ChatService;
 import ru.home.grpc.chat.server.service.HeaderInterceptor;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A sample gRPC server that serve the Chat (see chat.proto) service.
@@ -42,9 +45,17 @@ public class ChatServer {
     public ChatServer() throws Exception {
 
         port = 8090;
-        server = ServerBuilder.forPort(port)
-        .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))
-            .build();
+        
+        server = NettyServerBuilder
+                 .forPort(port)
+                 .permitKeepAliveWithoutCalls(true)
+                 .permitKeepAliveTime(5, TimeUnit.SECONDS)
+                 .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))
+                 .build();
+
+//        server = ServerBuilder.forPort(port)
+//            .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))
+//            .build();
     }
 
 
@@ -55,12 +66,12 @@ public class ChatServer {
         server.start();
         log.info("Server started, listening on " + port);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-            System.err.println("*** shutting down gRPC server since JVM is shutting down");
-            ChatServer.this.stop();
-            System.err.println("*** server shut down");
-        }));
+//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+//            System.err.println("*** shutting down gRPC server since JVM is shutting down");
+//            ChatServer.this.stop();
+//            System.err.println("*** server shut down");
+//        }));
     }
 
     /** Stop serving requests and shutdown resources. */
@@ -85,8 +96,18 @@ public class ChatServer {
 
 
     @PostConstruct
-    public void startup() throws IOException {
+    public void postConstruct() throws IOException {
         this.start();
+    }
+
+
+    @PreDestroy
+    public void destroy() {
+        // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+        System.err.println("*** shutting down gRPC server since JVM is shutting down");
+        ChatServer.this.stop();
+        System.err.println("*** server shut down");
+
     }
 
 }

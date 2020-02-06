@@ -2,10 +2,12 @@ package ru.home.grpc.chat.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import ru.home.grpc.chat.client.commands.ClientCommands;
 import ru.home.grpc.chat.client.service.ChatClient;
 
 import java.io.BufferedReader;
@@ -20,46 +22,31 @@ public class ClientStartupRunner implements ApplicationRunner {
     private static BufferedReader bufferIn;
     private final static Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+    @Autowired
+    ApplicationContext context;
+
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-        bufferIn = new BufferedReader(new InputStreamReader(System.in));
+        //ClientCommands commands = context.getBean(ClientCommands.class);
 
-        System.out.print("Enter you login: ");
-        String login = readLine();
+        //commands.connect(null);
 
-        System.out.print("Enter you password: ");
-        String password = readLine();
+//        bufferIn = new BufferedReader(new InputStreamReader(System.in));
+//
+//        System.out.print("Enter you login: ");
+//        String login = readLine();
+//
+//        System.out.print("Enter you password: ");
+//        String password = readLine();
 
 
         //String name = "123";
 
 
-
-
-        log.info("Connecting to server ...");
-        ChatClient client = new ChatClient("localhost", 8090, login, password);
-
-        client.start();
-
-        while(true) {
-            String text = readLine();
-            client.sendMessage(text);
-        }
-
         //log.info("Disconnecting ...");
         //client.shutdown();
     }
 
-
-    private static String readLine() {
-
-        String result = null;
-        try {
-            result = bufferIn.readLine();
-        }
-        catch (IOException ignore) {}
-        return result;
-    }
 }

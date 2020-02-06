@@ -53,10 +53,26 @@
             <groupId>com.google.errorprone</groupId>
             <artifactId>error_prone_annotations</artifactId>
         </dependency>
+        <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.jline/jline-reader &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>org.jline</groupId>-->
+            <!--<artifactId>jline-reader</artifactId>-->
+            <!--<version>3.9.0</version>-->
+        <!--</dependency>-->
+        
         <dependency>
             <groupId>ru.home.grpc</groupId>
             <artifactId>grpc-chat-shared-resources</artifactId>
         </dependency>
+
+
+
+        <dependency>
+            <groupId>ru.geekbrains.dreamworkerln.spring2.shell_lib</groupId>
+            <artifactId>shell-lib</artifactId>
+            <version>0.1</version>
+        </dependency>
+        
     </dependencies>
 
 
