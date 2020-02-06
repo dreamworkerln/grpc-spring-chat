@@ -47,6 +47,7 @@ public class HeaderInterceptor implements ServerInterceptor {
 
         String identity = getClientId(headers);
 
+        // add header value to context
         Context context = Context.current().withValue(USER_IDENTITY, identity);
 
         String[] methodList = call.getMethodDescriptor().getFullMethodName().split("/");

@@ -1,3 +1,4 @@
+
 # grpc-spring-chat  
 Spring Boot grpc chat demo
 
@@ -23,29 +24,30 @@ shell:$ connect
   
 login:any  
 password:1 
+  
+    
+     
+####used:
 
-used:
-
-server:  
+#####server:  
 NettyServerBuilder  
-                 .permitKeepAliveWithoutCalls(true)  
-                 .permitKeepAliveTime(5, TimeUnit.SECONDS)  
+&nbsp;&nbsp;&nbsp;&nbsp;.permitKeepAliveWithoutCalls(true)  
+&nbsp;&nbsp;&nbsp;&nbsp;.permitKeepAliveTime(5, TimeUnit.SECONDS)  
   
-authentication via loginpassword / token in message header  
+authentication via login/password / token in message header  
 
 
 
-client:  
+#####client:  
   
-  channelBuilder  
-            .keepAliveTime(10, TimeUnit.SECONDS)  
-            .keepAliveTimeout(20, TimeUnit.SECONDS)  
-            .keepAliveWithoutCalls(true)  
+channelBuilder  
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTime(10, TimeUnit.SECONDS)  
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTimeout(20, TimeUnit.SECONDS)  
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveWithoutCalls(true)  
             
-  using  
-    blockingStub.withDeadlineAfter  
+blockingStub.withDeadlineAfter  
     
-  dunno  
-    asyncStub.withDeadlineAfter ?  
-    
+dunno  
+asyncStub.withDeadlineAfter ?  
+   
                 
