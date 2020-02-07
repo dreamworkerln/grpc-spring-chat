@@ -1,6 +1,7 @@
 package ru.home.grpc.chat.server.service;
 
 import com.google.protobuf.Timestamp;
+import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
