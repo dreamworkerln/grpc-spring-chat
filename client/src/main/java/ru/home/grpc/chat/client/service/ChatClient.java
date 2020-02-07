@@ -24,10 +24,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import ru.home.grpc.chat.*;
 import ru.home.grpc.chat.client.commands.ClientEvents;
+import ru.home.grpc.chat.client.utils.UnauthenticatedException;
 
 import java.lang.invoke.MethodHandles;
 import java.nio.file.AccessDeniedException;
@@ -42,11 +44,14 @@ import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 @Service
 public class ChatClient {
 
-    public static final int DEADLINE_DURATION = 3000;
+    private static final String CLIENT_BASIC = "basic_auth";
+    private static final String CLIENT_TOKEN = "token_auth";
+
+    private static final int DEADLINE_DURATION = 3;
+    private static final int KEEP_ALIVE_TIME = 10;
+    private static final int KEEP_ALIVE_TIMEOUT = 20;
 
     public static final String DEFAULT_PORT = "8090";
-
-    private static final String CLIENT_ID = "client_id";
 
     private final static Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -54,11 +59,18 @@ public class ChatClient {
     private ClientEvents clientEvents;
 
     private ManagedChannel channel;
-    private ChatServiceGrpc.ChatServiceBlockingStub blockingStub;
-    private ChatServiceGrpc.ChatServiceStub asyncStub;
-    private StreamObserver<ClientMessage> chat;
+    private ConnectivityState lastState;
+    private ChatServiceGrpc.ChatServiceBlockingStub authStub;
+    private ChatServiceGrpc.ChatServiceStub chatStub;
+    private ChatServiceGrpc.ChatServiceStub pingStub;
+    private StreamObserver<ClientMessage> chatObserver;
+    private StreamObserver<PingMessage> pingObserver;
+
     private String login;
     private String password;
+
+    private boolean authenticated;
+    private boolean connected;
 
     @Autowired
     public void setApplicationEventPublisher(ClientEvents clientEvents) {
@@ -73,68 +85,75 @@ public class ChatClient {
         connect(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
     }
 
+    // .keepAliveWithoutCalls(true) allow TCP connection survive NAT translation decay dropping
+    // will implement handmade keepalive due to auth problems - see comments on server
+    // (unauthenticated clients will allowed to produce keepalive ping)
 
     // Construct client for accessing Chat server using the existing channel.
     protected void connect(ManagedChannelBuilder<?> channelBuilder) throws AccessDeniedException {
         channel = channelBuilder
-            .keepAliveTime(10, TimeUnit.SECONDS)
-            .keepAliveTimeout(20, TimeUnit.SECONDS)
-            .keepAliveWithoutCalls(true) // provide surviving NAT translation timeout dropping
+            .keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)
+            .keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)
+            .keepAliveWithoutCalls(false)
             .build();
+
+        // setup callbacks on channel state changes
+        setupStateHandlers();
 
         start();
     }
 
 
-    public void start() throws AccessDeniedException {
+    public void start() {
 
-        blockingStub = ChatServiceGrpc.newBlockingStub(channel);
-        asyncStub = ChatServiceGrpc.newStub(channel);
+        connected = false;
+        authenticated = false;
 
-        log.info("Authenticating to server");
+        // Assign basicAuth to authStub -----------------------------------------------------------------------------
+
+        authStub = ChatServiceGrpc.newBlockingStub(channel);
+
+        // adding basicAuth header
+        authStub = addBlockingStubHeader(authStub, login + ":" + password);
+
+        log.debug("Authenticating to server");
 
         // getting client id (access token, etc)
         // by authenticate yourself to server using login and password ------------------------------------------
-        AuthRequest authRequest = AuthRequest.newBuilder()
-            .setLogin(login)
-            .setPassword(password)
-            .build();
+        AuthRequest authRequest = AuthRequest.newBuilder().build();
 
         AuthResponse response;
 
-        response = blockingStub.withDeadlineAfter(DEADLINE_DURATION, TimeUnit.MILLISECONDS).authenticate(authRequest);
+        response = authStub.withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS).authenticate(authRequest);
 
-        int result = response.getResult();
-        if(result != 200) {
-            shutdown();
-            log.info("Server banned us: " + result);
-            throw new AccessDeniedException("Server response code error: " + result);
-        }
+//        if (authResponseCode != 200) {
+//            shutdown();
+//            log.info("Server banned us: " + authResponseCode);
+//            throw new UnauthenticatedException("Server response code error: " + authResponseCode);
+//        }
 
-        log.info("Connected to server.");
+        log.debug("Connected to server.");
 
-        // Assign token to asyncStub -----------------------------------------------------------------------------
+        // Assign token to chatStub -----------------------------------------------------------------------------
 
-        // assigning clientId to asyncStub as header value
-        String id = response.getId();
-        Assert.isTrue(!StringUtils.isBlank(id), "id is null");
-        Metadata.Key<String> clientIdKey = Metadata.Key.of(CLIENT_ID, ASCII_STRING_MARSHALLER);
-        Metadata fixedHeaders = new Metadata();
-        fixedHeaders.put(clientIdKey, id);
-        asyncStub = MetadataUtils.attachHeaders(asyncStub, fixedHeaders);
+        // add token to chatStub header
+        String token = response.getToken();
+        Assert.isTrue(!StringUtils.isBlank(token), "token is null");
 
-        // Dunno howto use deadline on asyncStub
-        //chat = asyncStub.withDeadlineAfter(10000, TimeUnit.MILLISECONDS)
-        //    .chat(new StreamObserver<ServerMessage>() {
+        chatStub = ChatServiceGrpc.newStub(channel);
+        chatStub = addAsyncStubHeader(chatStub, token);
 
+        // Dunno howto use deadline on chatStub
+        // chatObserver = chatStub.withDeadlineAfter(10000, TimeUnit.MILLISECONDS)
+        //     .chatObserver(new StreamObserver<ServerMessage>() {
         // Prepare to async chatting -----------------------------------------------------------------------------
 
-        chat = asyncStub.chat(new StreamObserver<ServerMessage>() {
+
+        chatObserver = chatStub.chat(new StreamObserver<ServerMessage>() {
 
             @Override
             public void onNext(ServerMessage reply) {
                 clientEvents.onMessage(reply);
-
             }
 
             @Override
@@ -147,7 +166,37 @@ public class ChatClient {
                 clientEvents.onClose();
             }
         });
+
+
+        // KeepAlive handmade ping  ---------------------------------------------------
+
+        pingStub = ChatServiceGrpc.newStub(channel);
+        pingStub = addAsyncStubHeader(pingStub, token);
+
+        pingObserver = pingStub.ping(new StreamObserver<PingMessage>() {
+            @Override
+            public void onNext(PingMessage value) {
+                log.trace("PING IN ack:{}", value.getAck());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+
+            }
+        });
+
+        // should set in last line or scheduled keepAlive(checking authenticated) may fail
+        authenticated = true;
     }
+
+
+    // -----------------------------------------------------------------------------
+
 
 
     public void sendMessage(String message) {
@@ -155,13 +204,21 @@ public class ChatClient {
         if (StringUtils.isBlank(message)) {
             return;
         }
-        chat.onNext(ClientMessage.newBuilder()
+
+        Assert.notNull(chatObserver, "chatObserver == null");
+
+        chatObserver.onNext(ClientMessage.newBuilder()
             .setMessage(message)
             .build());
     }
 
-
-
+    private void ping() {
+        PingMessage ping = PingMessage.newBuilder()
+            .setAck(false)
+            .build();
+        log.trace("PING OUT ack:{}", ping.getAck());
+        pingObserver.onNext(ping);
+    }
 
     public void shutdown() {
         try {
@@ -170,14 +227,79 @@ public class ChatClient {
     }
 
 
-    public boolean isConnected() {
-
-        if (channel != null) {
-            log.info(channel.getState(false).name());
-        }
-
-        return channel != null &&
-               channel.getState(false) == ConnectivityState.READY;
+    public boolean isOnline() {
+        return connected && authenticated;
     }
+
+
+    // =============================================================================
+
+    private ChatServiceGrpc.ChatServiceBlockingStub addBlockingStubHeader
+        (ChatServiceGrpc.ChatServiceBlockingStub stub, String value) {
+
+        Metadata.Key<String> clientIdKey = Metadata.Key.of(CLIENT_BASIC, ASCII_STRING_MARSHALLER);
+        Metadata headers = new Metadata();
+        headers.put(clientIdKey, value);
+
+        return MetadataUtils.attachHeaders(stub, headers);
+
+    }
+
+    private ChatServiceGrpc.ChatServiceStub addAsyncStubHeader
+        (ChatServiceGrpc.ChatServiceStub stub, String value) {
+
+        Metadata.Key<String> clientIdKey = Metadata.Key.of(CLIENT_TOKEN, ASCII_STRING_MARSHALLER);
+        Metadata headers = new Metadata();
+        headers.put(clientIdKey, value);
+
+        return MetadataUtils.attachHeaders(stub, headers);
+    }
+
+
+    // KEEPALIVE
+    @Scheduled(fixedDelay = 5000)
+    public void keepAlive() {
+
+        if (isOnline()) {
+            ping();
+        }
+    }
+
+    private void onStateChanged() {
+
+        ConnectivityState currentState = channel.getState(false);
+
+        log.debug("CHANNEL STATE CHANGED: {} -> {}", lastState, currentState);
+
+        connected = currentState == ConnectivityState.READY;
+
+        // re-apply due to channel.notifyWhenStateChanged -> Registers a one-off callback
+        setupStateHandlers();
+    }
+
+
+
+    private void setupStateHandlers() {
+        ConnectivityState state = channel.getState(false);
+        lastState = state;
+        channel.notifyWhenStateChanged(state, this::onStateChanged);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+//    private Metadata addHeader(Metadata headers, String value) {
+//        Metadata.Key<String> clientIdKey = Metadata.Key.of(CLIENT_ID, ASCII_STRING_MARSHALLER);
+//        headers.put(clientIdKey, value);
+//        return headers;
+//    }
 
 }

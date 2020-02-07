@@ -1,0 +1,266 @@
+2020-02-08 01:01:43.409  INFO 6443 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 6443 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:01:43.411  INFO 6443 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:01:43.815  INFO 6443 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:01:43.867  INFO 6443 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:01:43.877  INFO 6443 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.713 seconds (JVM running for 1.035)
+2020-02-08 01:01:57.480  INFO 6443 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:02:00.335  INFO 6703 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 6703 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:02:00.337  INFO 6703 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:02:00.738  INFO 6703 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:02:00.790  INFO 6703 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:02:00.800  INFO 6703 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.708 seconds (JVM running for 1.004)
+2020-02-08 01:06:52.377  INFO 6703 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:06:54.630  INFO 9642 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 9642 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:06:54.632  INFO 9642 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:06:55.051  INFO 9642 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:06:55.103  INFO 9642 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:06:55.114  INFO 9642 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.72 seconds (JVM running for 1.019)
+2020-02-08 01:07:25.248  INFO 9642 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,basic_auth=1:1,grpc-accept-encoding=gzip,grpc-timeout=119758m)
+2020-02-08 01:07:25.250  INFO 9642 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:07:25.256  INFO 9642 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has authenticated
+2020-02-08 01:07:25.281  INFO 9642 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=526189191ce813b3dbedf93f66108f0adc68e0a6743c84c12b3519cd58247a64,grpc-accept-encoding=gzip)
+2020-02-08 01:07:25.282  INFO 9642 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:07:25.282  INFO 9642 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has entered the chat
+2020-02-08 01:07:25.285  INFO 9642 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=526189191ce813b3dbedf93f66108f0adc68e0a6743c84c12b3519cd58247a64,grpc-accept-encoding=gzip)
+2020-02-08 01:07:25.285  INFO 9642 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:08:24.219 ERROR 9642 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : gRPC error: 
+
+io.grpc.StatusRuntimeException: CANCELLED: cancelled before receiving half close
+	at io.grpc.Status.asRuntimeException(Status.java:524) ~[grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.stub.ServerCalls$StreamingServerCallHandler$StreamingServerCallListener.onCancel(ServerCalls.java:275) ~[grpc-stub-1.27.0.jar:1.27.0]
+	at io.grpc.PartialForwardingServerCallListener.onCancel(PartialForwardingServerCallListener.java:40) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.ForwardingServerCallListener.onCancel(ForwardingServerCallListener.java:23) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.ForwardingServerCallListener$SimpleForwardingServerCallListener.onCancel(ForwardingServerCallListener.java:40) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.Contexts$ContextualizedServerCallListener.onCancel(Contexts.java:96) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.closedInternal(ServerCallImpl.java:353) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.closed(ServerCallImpl.java:341) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerImpl$JumpToApplicationThreadServerStreamListener$1Closed.runInContext(ServerImpl.java:867) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ContextRunnable.run(ContextRunnable.java:37) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:123) [grpc-core-1.27.0.jar:1.27.0]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [na:1.8.0_242]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [na:1.8.0_242]
+	at java.lang.Thread.run(Thread.java:748) [na:1.8.0_242]
+
+2020-02-08 01:08:24.219  INFO 9642 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Disconnected: '1'
+2020-02-08 01:08:48.152  INFO 9642 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,basic_auth=1:1,grpc-accept-encoding=gzip,grpc-timeout=119808m)
+2020-02-08 01:08:48.152  INFO 9642 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:08:48.152  INFO 9642 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has authenticated
+2020-02-08 01:08:48.171  INFO 9642 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=20a0f296f46678d2172c6420fe1626a1eff9d3b6d90d2ddbddd9f38bd6608f82,grpc-accept-encoding=gzip)
+2020-02-08 01:08:48.171  INFO 9642 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:08:48.171  INFO 9642 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has entered the chat
+2020-02-08 01:08:48.172  INFO 9642 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=20a0f296f46678d2172c6420fe1626a1eff9d3b6d90d2ddbddd9f38bd6608f82,grpc-accept-encoding=gzip)
+2020-02-08 01:08:48.172  INFO 9642 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:08:52.774  INFO 9642 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:14:52.267  INFO 15016 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 15016 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:14:52.269  INFO 15016 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:14:52.682  INFO 15016 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:14:52.731  INFO 15016 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:14:52.741  INFO 15016 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.732 seconds (JVM running for 1.031)
+2020-02-08 01:15:33.290  INFO 15016 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,basic_auth=1:1,grpc-accept-encoding=gzip,grpc-timeout=119922m)
+2020-02-08 01:15:33.292  INFO 15016 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:15:33.298  INFO 15016 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has authenticated
+2020-02-08 01:15:33.323  INFO 15016 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=888148f23ad887c2f60ecd08aaf3183786e428e1fec51dc43185d05a894a7bd3,grpc-accept-encoding=gzip)
+2020-02-08 01:15:33.324  INFO 15016 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:15:33.324  INFO 15016 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has entered the chat
+2020-02-08 01:15:33.325  INFO 15016 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=888148f23ad887c2f60ecd08aaf3183786e428e1fec51dc43185d05a894a7bd3,grpc-accept-encoding=gzip)
+2020-02-08 01:15:33.325  INFO 15016 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:19:23.797  INFO 15016 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:19:29.385  INFO 18172 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 18172 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:19:29.387  INFO 18172 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:19:29.781  INFO 18172 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:19:29.833  INFO 18172 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:19:29.843  INFO 18172 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.74 seconds (JVM running for 1.216)
+2020-02-08 01:19:40.986  INFO 18172 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,basic_auth=1:1,grpc-accept-encoding=gzip,grpc-timeout=119746m)
+2020-02-08 01:19:40.988  INFO 18172 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:19:40.994  INFO 18172 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has authenticated
+2020-02-08 01:19:41.022  INFO 18172 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=d4472c321cba13ef1554d199c449469e1a4c5ddd926a43b0c1d87fe3a454ab6a,grpc-accept-encoding=gzip)
+2020-02-08 01:19:41.022  INFO 18172 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:19:41.022  INFO 18172 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has entered the chat
+2020-02-08 01:19:41.030  INFO 18172 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=d4472c321cba13ef1554d199c449469e1a4c5ddd926a43b0c1d87fe3a454ab6a,grpc-accept-encoding=gzip)
+2020-02-08 01:19:41.030  INFO 18172 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:20:58.077 ERROR 18172 --- [grpc-default-executor-1] r.h.g.chat.server.service.ChatService    : gRPC error: 
+
+io.grpc.StatusRuntimeException: CANCELLED: cancelled before receiving half close
+	at io.grpc.Status.asRuntimeException(Status.java:524) ~[grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.stub.ServerCalls$StreamingServerCallHandler$StreamingServerCallListener.onCancel(ServerCalls.java:275) ~[grpc-stub-1.27.0.jar:1.27.0]
+	at io.grpc.PartialForwardingServerCallListener.onCancel(PartialForwardingServerCallListener.java:40) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.ForwardingServerCallListener.onCancel(ForwardingServerCallListener.java:23) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.ForwardingServerCallListener$SimpleForwardingServerCallListener.onCancel(ForwardingServerCallListener.java:40) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.Contexts$ContextualizedServerCallListener.onCancel(Contexts.java:96) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.closedInternal(ServerCallImpl.java:353) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.closed(ServerCallImpl.java:341) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerImpl$JumpToApplicationThreadServerStreamListener$1Closed.runInContext(ServerImpl.java:867) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ContextRunnable.run(ContextRunnable.java:37) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:123) [grpc-core-1.27.0.jar:1.27.0]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [na:1.8.0_242]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [na:1.8.0_242]
+	at java.lang.Thread.run(Thread.java:748) [na:1.8.0_242]
+
+2020-02-08 01:20:58.078  INFO 18172 --- [grpc-default-executor-1] r.h.g.chat.server.service.ChatService    : Disconnected: '1'
+2020-02-08 01:21:06.776  INFO 18172 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,basic_auth=1:1,grpc-accept-encoding=gzip,grpc-timeout=119987m)
+2020-02-08 01:21:06.776  INFO 18172 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:21:06.777  INFO 18172 --- [grpc-default-executor-1] r.h.g.chat.server.service.ChatService    : Client '1' has authenticated
+2020-02-08 01:21:06.779  INFO 18172 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=fe8f5c644bc58a24a40ec376a1735833fb7d3aa03e30c35cbad0f73866a48916,grpc-accept-encoding=gzip)
+2020-02-08 01:21:06.779  INFO 18172 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:21:06.779  INFO 18172 --- [grpc-default-executor-2] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=fe8f5c644bc58a24a40ec376a1735833fb7d3aa03e30c35cbad0f73866a48916,grpc-accept-encoding=gzip)
+2020-02-08 01:21:06.779  INFO 18172 --- [grpc-default-executor-2] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:21:06.779  INFO 18172 --- [grpc-default-executor-1] r.h.g.chat.server.service.ChatService    : Client '1' has entered the chat
+2020-02-08 01:21:08.296  INFO 18172 --- [grpc-default-executor-1] r.h.g.chat.server.service.ChatService    : From 1: df dsf 
+2020-02-08 01:21:09.254  INFO 18172 --- [grpc-default-executor-1] r.h.g.chat.server.service.ChatService    : From 1: dsf dsf ds
+2020-02-08 01:21:11.383 ERROR 18172 --- [grpc-default-executor-2] r.h.g.chat.server.service.ChatService    : gRPC error: 
+
+io.grpc.StatusRuntimeException: CANCELLED: cancelled before receiving half close
+	at io.grpc.Status.asRuntimeException(Status.java:524) ~[grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.stub.ServerCalls$StreamingServerCallHandler$StreamingServerCallListener.onCancel(ServerCalls.java:275) ~[grpc-stub-1.27.0.jar:1.27.0]
+	at io.grpc.PartialForwardingServerCallListener.onCancel(PartialForwardingServerCallListener.java:40) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.ForwardingServerCallListener.onCancel(ForwardingServerCallListener.java:23) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.ForwardingServerCallListener$SimpleForwardingServerCallListener.onCancel(ForwardingServerCallListener.java:40) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.Contexts$ContextualizedServerCallListener.onCancel(Contexts.java:96) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.closedInternal(ServerCallImpl.java:353) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.closed(ServerCallImpl.java:341) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerImpl$JumpToApplicationThreadServerStreamListener$1Closed.runInContext(ServerImpl.java:867) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ContextRunnable.run(ContextRunnable.java:37) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:123) [grpc-core-1.27.0.jar:1.27.0]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [na:1.8.0_242]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [na:1.8.0_242]
+	at java.lang.Thread.run(Thread.java:748) [na:1.8.0_242]
+
+2020-02-08 01:21:11.383  INFO 18172 --- [grpc-default-executor-2] r.h.g.chat.server.service.ChatService    : Disconnected: '1'
+2020-02-08 01:24:22.603  INFO 18172 --- [grpc-default-executor-3] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,basic_auth=1:1,grpc-accept-encoding=gzip,grpc-timeout=119795m)
+2020-02-08 01:24:22.603  INFO 18172 --- [grpc-default-executor-3] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:24:22.603  INFO 18172 --- [grpc-default-executor-3] r.h.g.chat.server.service.ChatService    : Client '1' has authenticated
+2020-02-08 01:24:22.624  INFO 18172 --- [grpc-default-executor-3] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=974b3c924a0d1dd5e46b31248873c083b02ed6507801b954c46fd009542e448d,grpc-accept-encoding=gzip)
+2020-02-08 01:24:22.624  INFO 18172 --- [grpc-default-executor-3] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:24:22.624  INFO 18172 --- [grpc-default-executor-3] r.h.g.chat.server.service.ChatService    : Client '1' has entered the chat
+2020-02-08 01:24:22.626  INFO 18172 --- [grpc-default-executor-3] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=974b3c924a0d1dd5e46b31248873c083b02ed6507801b954c46fd009542e448d,grpc-accept-encoding=gzip)
+2020-02-08 01:24:22.626  INFO 18172 --- [grpc-default-executor-3] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:24:24.700  INFO 18172 --- [grpc-default-executor-3] r.h.g.chat.server.service.ChatService    : From 1: dfdsf
+2020-02-08 01:24:24.989  INFO 18172 --- [grpc-default-executor-3] r.h.g.chat.server.service.ChatService    : From 1: dsf
+2020-02-08 01:24:25.336  INFO 18172 --- [grpc-default-executor-3] r.h.g.chat.server.service.ChatService    : From 1: sdf
+2020-02-08 01:24:25.634  INFO 18172 --- [grpc-default-executor-3] r.h.g.chat.server.service.ChatService    : From 1: dsf
+2020-02-08 01:24:26.913  INFO 18172 --- [grpc-default-executor-3] r.h.g.chat.server.service.ChatService    : From 1: dsf
+2020-02-08 01:24:28.964  INFO 18172 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:27:07.517  INFO 23216 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 23216 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:27:07.519  INFO 23216 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:27:07.909  INFO 23216 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:27:07.957  INFO 23216 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:27:07.968  INFO 23216 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.691 seconds (JVM running for 0.997)
+2020-02-08 01:27:11.081  INFO 23216 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,basic_auth=1:1,grpc-accept-encoding=gzip,grpc-timeout=119761m)
+2020-02-08 01:27:11.083  INFO 23216 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:27:11.089  INFO 23216 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has authenticated
+2020-02-08 01:27:11.114  INFO 23216 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=593351e86946af9a66c8614c63b32c1a4f47ad781aa16deb944a0614261a7c45,grpc-accept-encoding=gzip)
+2020-02-08 01:27:11.114  INFO 23216 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:27:11.114  INFO 23216 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has entered the chat
+2020-02-08 01:27:11.115  INFO 23216 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=593351e86946af9a66c8614c63b32c1a4f47ad781aa16deb944a0614261a7c45,grpc-accept-encoding=gzip)
+2020-02-08 01:27:11.116  INFO 23216 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:27:40.641 ERROR 23216 --- [grpc-default-executor-1] r.h.g.chat.server.service.ChatService    : gRPC error: 
+
+io.grpc.StatusRuntimeException: CANCELLED: cancelled before receiving half close
+	at io.grpc.Status.asRuntimeException(Status.java:524) ~[grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.stub.ServerCalls$StreamingServerCallHandler$StreamingServerCallListener.onCancel(ServerCalls.java:275) ~[grpc-stub-1.27.0.jar:1.27.0]
+	at io.grpc.PartialForwardingServerCallListener.onCancel(PartialForwardingServerCallListener.java:40) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.ForwardingServerCallListener.onCancel(ForwardingServerCallListener.java:23) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.ForwardingServerCallListener$SimpleForwardingServerCallListener.onCancel(ForwardingServerCallListener.java:40) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.Contexts$ContextualizedServerCallListener.onCancel(Contexts.java:96) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.closedInternal(ServerCallImpl.java:353) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.closed(ServerCallImpl.java:341) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerImpl$JumpToApplicationThreadServerStreamListener$1Closed.runInContext(ServerImpl.java:867) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ContextRunnable.run(ContextRunnable.java:37) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:123) [grpc-core-1.27.0.jar:1.27.0]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [na:1.8.0_242]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [na:1.8.0_242]
+	at java.lang.Thread.run(Thread.java:748) [na:1.8.0_242]
+
+2020-02-08 01:27:40.641  INFO 23216 --- [grpc-default-executor-1] r.h.g.chat.server.service.ChatService    : Disconnected: '1'
+2020-02-08 01:29:48.270  INFO 23216 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:29:53.179  INFO 25117 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 25117 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:29:53.181  INFO 25117 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:29:53.601  INFO 25117 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:29:53.654  INFO 25117 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:29:53.665  INFO 25117 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.727 seconds (JVM running for 1.017)
+2020-02-08 01:31:22.784  INFO 25117 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:32:28.400  INFO 27008 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 27008 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:32:28.402  INFO 27008 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:32:28.793  INFO 27008 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:32:28.842  INFO 27008 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:32:28.852  INFO 27008 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.685 seconds (JVM running for 1.025)
+2020-02-08 01:34:42.156  INFO 27008 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:34:51.370  INFO 27379 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 27379 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:34:51.372  INFO 27379 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:34:51.801  INFO 27379 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:34:51.853  INFO 27379 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:34:51.864  INFO 27379 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.728 seconds (JVM running for 1.004)
+2020-02-08 01:34:59.432  INFO 27379 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:36:08.651  INFO 27756 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 27756 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:36:08.653  INFO 27756 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:36:09.055  INFO 27756 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:36:09.106  INFO 27756 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:36:09.117  INFO 27756 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.701 seconds (JVM running for 0.998)
+2020-02-08 01:36:11.474  INFO 27756 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,basic_auth=1:1,grpc-accept-encoding=gzip,grpc-timeout=119880m)
+2020-02-08 01:36:11.475  INFO 27756 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:36:11.482  INFO 27756 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has authenticated
+2020-02-08 01:36:11.507  INFO 27756 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=49d2deea816c11cf08924f89f76e3e47e01f45f0d164b15ae2406d3300813e9e,grpc-accept-encoding=gzip)
+2020-02-08 01:36:11.507  INFO 27756 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:36:11.507  INFO 27756 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has entered the chat
+2020-02-08 01:36:11.509  INFO 27756 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=49d2deea816c11cf08924f89f76e3e47e01f45f0d164b15ae2406d3300813e9e,grpc-accept-encoding=gzip)
+2020-02-08 01:36:11.509  INFO 27756 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:36:34.377  INFO 27756 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: ewrewrewr
+2020-02-08 01:36:36.108  INFO 27756 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: ewrewrewrewrewrewr
+2020-02-08 01:36:38.406  INFO 27756 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:39:33.409  INFO 28514 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 28514 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:39:33.411  INFO 28514 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:39:33.800  INFO 28514 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:39:33.848  INFO 28514 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:39:33.858  INFO 28514 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.682 seconds (JVM running for 1.078)
+2020-02-08 01:39:48.752  INFO 28514 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,basic_auth=1:1,grpc-accept-encoding=gzip,grpc-timeout=2927100u)
+2020-02-08 01:39:48.754  INFO 28514 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:39:48.761  INFO 28514 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has authenticated
+2020-02-08 01:39:48.784  INFO 28514 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=f3e9e4450e0b882c546a66762425091577c1e2507afa3c80fd4da5a9e5d7674d,grpc-accept-encoding=gzip)
+2020-02-08 01:39:48.784  INFO 28514 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:39:48.784  INFO 28514 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has entered the chat
+2020-02-08 01:39:48.785  INFO 28514 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=f3e9e4450e0b882c546a66762425091577c1e2507afa3c80fd4da5a9e5d7674d,grpc-accept-encoding=gzip)
+2020-02-08 01:39:48.785  INFO 28514 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:40:20.187  INFO 28514 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: saasd
+2020-02-08 01:40:21.450  INFO 28514 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: dasdasdasdasd
+2020-02-08 01:40:22.242  INFO 28514 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: asdasdasd
+2020-02-08 01:40:23.908  INFO 28514 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: asdasdasdasdasdasdasd
+2020-02-08 01:40:24.690  INFO 28514 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: asdasdasd
+2020-02-08 01:40:25.910  INFO 28514 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: asdasdasdasdasd
+2020-02-08 01:40:26.714  INFO 28514 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: asdasdasd
+2020-02-08 01:40:27.954  INFO 28514 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: asdasdasdasdasd
+2020-02-08 01:40:30.153  INFO 28514 --- [SpringContextShutdownHook] o.s.s.c.ThreadPoolTaskScheduler          : Shutting down ExecutorService 'taskScheduler'
+2020-02-08 01:43:46.261  INFO 28837 --- [main] r.h.g.chat.server.ChatServerApplication  : Starting ChatServerApplication on mintpc with PID 28837 (/home/khatuncev/coding/java/grpc/grpc-spring-chat/server/target/classes started by khatuncev in /home/khatuncev/coding/java/grpc/grpc-spring-chat)
+2020-02-08 01:43:46.263  INFO 28837 --- [main] r.h.g.chat.server.ChatServerApplication  : No active profile set, falling back to default profiles: default
+2020-02-08 01:43:46.653  INFO 28837 --- [main] r.h.grpc.chat.server.server.ChatServer   : Server started, listening on 8090
+2020-02-08 01:43:46.700  INFO 28837 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-02-08 01:43:46.710  INFO 28837 --- [main] r.h.g.chat.server.ChatServerApplication  : Started ChatServerApplication in 0.684 seconds (JVM running for 1.018)
+2020-02-08 01:43:51.984  INFO 28837 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,basic_auth=1:1,grpc-accept-encoding=gzip,grpc-timeout=2933882u)
+2020-02-08 01:43:51.985  INFO 28837 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:43:51.992  INFO 28837 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has authenticated
+2020-02-08 01:43:52.005  INFO 28837 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=c2d3a143042709f3b0d0a504fbbc55ddcccf03dae486095534bf59bf14212aab,grpc-accept-encoding=gzip)
+2020-02-08 01:43:52.005  INFO 28837 --- [grpc-default-executor-0] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:43:52.005  INFO 28837 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : Client '1' has entered the chat
+2020-02-08 01:43:52.005  INFO 28837 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : incoming call: Metadata(content-type=application/grpc,user-agent=grpc-java-netty/1.27.0,token_auth=c2d3a143042709f3b0d0a504fbbc55ddcccf03dae486095534bf59bf14212aab,grpc-accept-encoding=gzip)
+2020-02-08 01:43:52.005  INFO 28837 --- [grpc-default-executor-1] r.h.g.c.s.service.HeaderInterceptor      : Client authentication successful
+2020-02-08 01:44:08.126  INFO 28837 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: hgfhgfh
+2020-02-08 01:44:09.417  INFO 28837 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: gfhgfhgfhgfhgf
+2020-02-08 01:44:10.952  INFO 28837 --- [grpc-default-executor-0] r.h.g.chat.server.service.ChatService    : From 1: fghgfhgfhgfhgfhgfh
+2020-02-08 01:44:11.924 ERROR 28837 --- [grpc-default-executor-1] r.h.g.chat.server.service.ChatService    : gRPC error: 
+
+io.grpc.StatusRuntimeException: CANCELLED: cancelled before receiving half close
+	at io.grpc.Status.asRuntimeException(Status.java:524) ~[grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.stub.ServerCalls$StreamingServerCallHandler$StreamingServerCallListener.onCancel(ServerCalls.java:275) ~[grpc-stub-1.27.0.jar:1.27.0]
+	at io.grpc.PartialForwardingServerCallListener.onCancel(PartialForwardingServerCallListener.java:40) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.ForwardingServerCallListener.onCancel(ForwardingServerCallListener.java:23) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.ForwardingServerCallListener$SimpleForwardingServerCallListener.onCancel(ForwardingServerCallListener.java:40) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.Contexts$ContextualizedServerCallListener.onCancel(Contexts.java:96) [grpc-api-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.closedInternal(ServerCallImpl.java:353) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.closed(ServerCallImpl.java:341) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ServerImpl$JumpToApplicationThreadServerStreamListener$1Closed.runInContext(ServerImpl.java:867) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.ContextRunnable.run(ContextRunnable.java:37) [grpc-core-1.27.0.jar:1.27.0]
+	at io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:123) [grpc-core-1.27.0.jar:1.27.0]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [na:1.8.0_242]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [na:1.8.0_242]
+	at java.lang.Thread.run(Thread.java:748) [na:1.8.0_242]
+
+2020-02-08 01:44:11.924  INFO 28837 --- [grpc-default-executor-1] r.h.g.chat.server.service.ChatService    : Disconnected: '1'

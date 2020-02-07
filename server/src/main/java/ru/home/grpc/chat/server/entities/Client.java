@@ -6,14 +6,14 @@ import ru.home.grpc.chat.ServerMessage;
 public class Client {
 
 
-    String name;
-    String id;
+    String login;
+    String token;
 
     StreamObserver<ServerMessage> responseObserver;
 
-    public Client(String name, String id) {
-        this.name = name;
-        this.id = id;
+    public Client(String login, String token) {
+        this.login = login;
+        this.token = token;
     }
 
     public StreamObserver<ServerMessage> getResponseObserver() {
@@ -24,19 +24,19 @@ public class Client {
         this.responseObserver = responseObserver;
     }
 
-    public String getName() {
-        return name;
+    public String getLogin() {
+        return login;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLogin(String login) {
+        this.login = login;
     }
 
-    public String getId() {
-        return id;
+    public String getToken() {
+        return token;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setToken(String token) {
+        this.token = token;
     }
 }
