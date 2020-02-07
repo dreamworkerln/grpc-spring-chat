@@ -50,7 +50,7 @@ public class ClientCommands implements ClientEvents {
         this.client = client;
     }
 
-    @ShellMethod("Connect to server")
+    @ShellMethod("Connect to server.")
     public void connect(@ShellOption(defaultValue = ShellOption.NULL)String host) {
 
 
@@ -147,7 +147,7 @@ public class ClientCommands implements ClientEvents {
     // -------------------------------------------------------------
 
 
-    @ShellMethod("Disconnect from server")
+    @ShellMethod("Disconnect from server.")
     public void disconnect() throws InterruptedException {
         client.shutdown();
     }
