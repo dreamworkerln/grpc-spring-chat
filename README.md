@@ -51,7 +51,7 @@ Later going to
 &nbsp;&nbsp;&nbsp;&nbsp;.keepAliveWithoutCalls(false)  
 and implement manual keepalive rpc (only for authenticated clients) because  
 if .keepAliveWithoutCalls(true) then unauthenticated clients can produce keepalive messages.  
-And you cannot kick user from server.  
+And you cannot kick client from server.  
   
 > But in short, you can't forcefully close a connection based on an RPC on server  
 https://github.com/grpc/grpc-java/issues/779  
