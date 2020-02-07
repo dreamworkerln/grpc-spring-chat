@@ -22,6 +22,7 @@ import io.grpc.ServerInterceptors;
 import io.grpc.netty.NettyServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.home.grpc.chat.server.service.ChatService;
 import ru.home.grpc.chat.server.service.HeaderInterceptor;
@@ -39,23 +40,31 @@ import java.util.concurrent.TimeUnit;
 public class ChatServer {
     private final static Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+    @Value("${grpc.server.port:8090}")
     private final int port;
+
     private final Server server;
 
     public ChatServer() throws Exception {
 
         port = 8090;
-        
-        server = NettyServerBuilder
-                 .forPort(port)
-                 .permitKeepAliveWithoutCalls(true)
-                 .permitKeepAliveTime(5, TimeUnit.SECONDS)
-                 .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))
-                 .build();
 
-//        server = ServerBuilder.forPort(port)
-//            .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))
-//            .build();
+        // https://github.com/grpc/grpc-java/issues/779
+        // why implementing handmade keepalive
+        // "But in short, on server you can't forcefully close a connection based on an RPC"
+        // So going to kill idle unauthenticated connections using .maxConnectionIdle(...)
+        // Or unauthenticated clients will send to server keepalive requests forever
+        // this will happen when .permitKeepAliveWithoutCalls(true)
+        // But without built-in or manual keepalive tcp connection will die on
+        // NAT translation decay (idle TCP connection through NAT die in ~10 min)
+
+        server = NettyServerBuilder
+            .forPort(port)
+            .permitKeepAliveWithoutCalls(false)
+            .maxConnectionIdle(30, TimeUnit.SECONDS)
+            .permitKeepAliveTime(5, TimeUnit.SECONDS)
+            .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))
+            .build();
     }
 
 

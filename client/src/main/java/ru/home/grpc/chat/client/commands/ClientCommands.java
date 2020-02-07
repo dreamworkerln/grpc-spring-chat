@@ -12,13 +12,13 @@ import org.springframework.util.StringUtils;
 import ru.geekbrains.dreamworkerln.spring2.shell_lib.shell.InputReader;
 import ru.geekbrains.dreamworkerln.spring2.shell_lib.shell.ShellHelper;
 import ru.home.grpc.chat.ServerMessage;
-import ru.home.grpc.chat.client.ChatClientApplication;
 import ru.home.grpc.chat.client.service.ChatClient;
+import ru.home.grpc.chat.client.utils.UnauthenticatedException;
+
 import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.AccessDeniedException;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class ClientCommands implements ClientEvents {
     }
 
     @ShellMethod("Connect to server")
-    public void connect(@ShellOption(defaultValue = ShellOption.NULL)String host) throws Exception {
+    public void connect(@ShellOption(defaultValue = ShellOption.NULL)String host) {
 
 
         String login = null;
@@ -78,14 +78,10 @@ public class ClientCommands implements ClientEvents {
 
             // get login/password -------------------------------------------------
 
-            login = inputReader.prompt( "login: ");
+            login = inputReader.prompt("login: ");
             String password = inputReader.prompt("password: ", "secret", false);
 
-            //shellHelper.printInfo("connected to " + host + " using: " + login + "/" + password);
-
-
             // Synchronous connecting - authenticate ------------------------------------------
-
 
             shellHelper.printInfo("Connecting to server " + printURI(server));
             client.connect(server.getHost(), server.getPort(), login, password);
@@ -94,48 +90,45 @@ public class ClientCommands implements ClientEvents {
         // handling gRPC Errors
         catch (StatusRuntimeException e) {
             shellHelper.printError(e.getStatus().getCode().name());
-            log.info("gRPC Auth error", e);
+            //log.info("gRPC Auth error", e);
+        }
+        catch (UnauthenticatedException e) {
+            shellHelper.printError(e.getMessage());
+            //log.info("gRPC Auth error", e);
         }
         // handling Ctrl+C
         catch (UserInterruptException e) {
             System.out.println("^C");
         }
-        catch (AccessDeniedException e) {
-            shellHelper.printError(e.getMessage());
-            log.info("gRPC Auth error", e);
-        }
         // ?????
         catch (Exception e) {
-            log.info("gRPC Auth error", e);
+            log.info("STRANGE ERROR ???", e);
         }
 
-        // exit if have errors ---------------------------------------------------------------
+        // exit chat if have errors ---------------------------------------------------------------
 
-        if(!client.isConnected()) {
-            ChatClientApplication.fakeStdIn();
+        if(!client.isOnline()) {
+
+            client.shutdown();
             return;
         }
 
         // -------------------------------------------------------------------------------------------
         // Async chatting ----------------------------------------------------------------------------
 
-        //padding = new String(new char[login.length()]).replace("\0", " ");
-        System.out.println("Chat is online");
-        //System.out.print(padding);
 
+        System.out.println("Chat is online");
 
         // Async chatting -------------------------------------------------------------------
         try {
-            while (client.isConnected()) {
-                //String message = inputReader.prompt("> " + padding);
+            while (client.isOnline()) {
                 String message = inputReader.prompt();
                 client.sendMessage(message);
             }
         }
         // handling gRPC Errors
         catch (StatusRuntimeException e){
-
-            System.out.println("ОПАПОПАОПАОПА ОПА ОПА ОПА ОПА ОПА ОПА ОПА!!!!");
+            System.out.println("ОПАОПАОПА ОПА ОПА ОПА ОПА ОПА ОПА ОПА ОПА!!!!");
             shellHelper.printError(e.getStatus().getCode().name());
             log.error("gRPC error", e);
         }
@@ -143,16 +136,12 @@ public class ClientCommands implements ClientEvents {
         catch (UserInterruptException e){
             System.out.println("^C");
         }
-
         catch (Exception e) {
-            shellHelper.printError(e.getMessage());
+            log.error("gRPC error", e);
         }
         finally {
             client.shutdown();
         }
-
-        // swallow all errors
-        ChatClientApplication.fakeStdIn();
     }
 
     // -------------------------------------------------------------
@@ -179,7 +168,6 @@ public class ClientCommands implements ClientEvents {
                 tryGetURI(e.getValue() + ":" + ChatClient.DEFAULT_PORT)))
                 .filter(e -> e.getValue() != null)
                 .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
-
     }
 
 
@@ -188,8 +176,6 @@ public class ClientCommands implements ClientEvents {
     @Override
     public void onMessage(ServerMessage message)  {
         System.out.println(message.getFrom() + ": " + message.getMessage());
-        //System.out.print(padding);
-        ChatClientApplication.fakeStdIn();
     }
 
     @Override
@@ -203,8 +189,7 @@ public class ClientCommands implements ClientEvents {
         if (t instanceof StatusRuntimeException) {
             shellHelper.printError(((StatusRuntimeException)t).getStatus().getCode().name());
         }
-        log.info("gRPC error", t);
-        ChatClientApplication.fakeStdIn();
+        log.debug("gRPC error", t);
     }
 
     @Override
@@ -215,7 +200,6 @@ public class ClientCommands implements ClientEvents {
     @Override
     public void onClose() {
         System.out.println("Disconnected");
-        ChatClientApplication.fakeStdIn();
     }
 
 
@@ -343,3 +327,10 @@ public class ClientCommands implements ClientEvents {
 }
 
 
+//  shellHelper.printInfo("connected to " + host + " using: " + login + "/" + password);
+
+
+//padding = new String(new char[login.length()]).replace("\0", " ");
+
+
+//String message = inputReader.prompt("> " + padding);

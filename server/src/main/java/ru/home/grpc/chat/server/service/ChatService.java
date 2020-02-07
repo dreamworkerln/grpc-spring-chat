@@ -1,17 +1,19 @@
 package ru.home.grpc.chat.server.service;
 
 import com.google.protobuf.Timestamp;
-import io.grpc.Context;
+import io.grpc.stub.ClientCallStreamObserver;
+import io.grpc.stub.ClientResponseObserver;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import ru.home.grpc.chat.*;
 import ru.home.grpc.chat.server.entities.Client;
 import ru.home.grpc.chat.server.entities.ClientList;
+import ru.home.grpc.chat.server.utils.Credentials;
 
+import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandles;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -21,16 +23,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_256;
+import static ru.home.grpc.chat.server.utils.Headers.CLIENT_BASIC_CONTEXT_KEY;
+import static ru.home.grpc.chat.server.utils.Headers.CLIENT_TOKEN_CONTEXT_KEY;
 
 
 public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
 
-
-
     private final static Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    //private static Set<StreamObserver<ServerReply>> clients = ConcurrentHashMap.newKeySet();
-
+    // Contains all current connected clients (singleton)
     private Map<String, Client> clientList = ClientList.INSTANCE.clientList;
 
     private SecureRandom secureRandom;
@@ -44,36 +45,25 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
         secureRandom = SecureRandom.getInstance("NativePRNG");
     }
 
+
     @Override
     public void authenticate(AuthRequest request, StreamObserver<AuthResponse> responseObserver) {
 
-        int result = 403;
+        Credentials credentials = getCredentials();
+        String login = credentials.getLogin();
 
-        String login = request.getLogin();
-        String password = request.getPassword();
-        String id = "";
+        // multiply login from same account enabled
+        // will allow simultaneously authenticate several clients with same login/password
+        // to prevent this need to have index on client.login
+        String token = generateToken();
 
-        log.info("Client '{}' authenticating", login);
+        Client client = new Client(login, token);
+        clientList.put(token, client);
 
-        if (!StringUtils.isBlank(login)&&
-            !StringUtils.isBlank(password) &&
-            password.equals("1")) {
-
-            result = 200;
-
-            id = generateId();
-            Client client = new Client(login, id);
-            clientList.put(id, client);
-
-            String msg = String.format("Client '%1$s' has logged in", client.getName());
-            log.info(msg);
-
-            broadcast(buildServerMessage("server", msg));
-        }
+        log.info("Client '{}' has authenticated", login);
 
         AuthResponse response = AuthResponse.newBuilder()
-            .setResult(result)
-            .setId(id)
+            .setToken(token)
             .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -88,11 +78,13 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
 
         Client client = getClient();
 
-        //log.info("New client '{}' connected to chat", client.getName());
+        Assert.isNull(client.getResponseObserver(), "client.getResponseObserver() != null");
+        client.setResponseObserver(responseObserver);
 
-        if (client.getResponseObserver() == null) {
-            client.setResponseObserver(responseObserver);
-        }
+        String msg = String.format("Client '%1$s' has entered the chat", client.getLogin());
+        log.info(msg);
+        broadcast(buildServerMessage("server", msg));
+
 
         return new StreamObserver<ClientMessage>() {
 
@@ -101,9 +93,9 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
 
                 Client client = getClient();
 
-                log.info("From {}: {}", client.getName(), chatMessage.getMessage());
+                log.info("From {}: {}", client.getLogin(), chatMessage.getMessage());
 
-                ServerMessage serverMessage = buildServerMessage(client.getName(), chatMessage.getMessage());
+                ServerMessage serverMessage = buildServerMessage(client.getLogin(), chatMessage.getMessage());
 
                 broadcast(serverMessage);
             }
@@ -114,9 +106,9 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
                 log.error("gRPC error: ", throwable);
 
                 Client client = getClient();
-                clientList.remove(client.getId());
+                clientList.remove(client.getToken());
 
-                String msg = String.format("Disconnected: '%1$s'", client.getName());
+                String msg = String.format("Disconnected: '%1$s'", client.getLogin());
                 log.info(msg);
                 broadcast(buildServerMessage("server", msg));
             }
@@ -125,9 +117,9 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
             public void onCompleted() {
 
                 Client client = getClient();
-                clientList.remove(client.getId());
+                clientList.remove(client.getToken());
 
-                String msg = String.format("Disconnected: '%1$s'", client.getName());
+                String msg = String.format("Disconnected: '%1$s'", client.getLogin());
                 log.info(msg);
                 broadcast(buildServerMessage("server", msg));
             }
@@ -135,6 +127,34 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
         };
     }
 
+    @Override
+    public StreamObserver<PingMessage> ping(StreamObserver<PingMessage> responseObserver) {
+
+        return new StreamObserver<PingMessage>() {
+
+            @Override
+            public void onNext(PingMessage value) {
+
+                log.trace("PING IN ack:{}", value.getAck());
+                PingMessage pong = PingMessage.newBuilder()
+                    .setAck(true)
+                    .build();
+                log.debug("PING OUT ack:{}", pong.getAck());
+                responseObserver.onNext(pong);
+            }
+
+            @Override
+            public void onError(Throwable t) {}
+
+            @Override
+            public void onCompleted() {}
+        };
+
+
+    }
+
+
+    // --------------------------------------------------------------------------------------
 
     private void broadcast(ServerMessage serverMessage) {
 
@@ -160,11 +180,23 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
     }
 
 
-    private Client getClient() {
+    private Credentials getCredentials() {
 
-        String clientId = (String)HeaderInterceptor.USER_IDENTITY.get();
-        Client client = clientList.get(clientId);
-        Assert.notNull(client, "Unauthorized request, how ???");
+        Credentials result;
+        result =  (Credentials)CLIENT_BASIC_CONTEXT_KEY.get();
+        Assert.notNull(result, "credentials == null");
+        return result;
+    }
+
+
+    /**
+     * get client from Context
+     * @return @NotNull client
+     */
+    private Client getClient() {
+        String token = (String)CLIENT_TOKEN_CONTEXT_KEY.get();
+        Client client = clientList.get(token);
+        Assert.notNull(client, "client == null");
         return client;
     }
 
@@ -185,7 +217,7 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
     }
 
 
-    private String generateId() {
+    private String generateToken() {
 
         String id = Long.toString(idAtomic.getAndIncrement()) +
                     Long.toString(Instant.now().toEpochMilli()) +
@@ -196,3 +228,5 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
 
 
 }
+
+//private static Set<StreamObserver<ServerReply>> clients = ConcurrentHashMap.newKeySet();

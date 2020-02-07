@@ -3,15 +3,21 @@ package ru.home.grpc.chat.server.service;
 import io.grpc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import ru.home.grpc.chat.server.entities.Client;
 import ru.home.grpc.chat.server.entities.ClientList;
+import ru.home.grpc.chat.server.utils.Credentials;
+import ru.home.grpc.chat.server.utils.Headers;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
-
+import static ru.home.grpc.chat.server.utils.Headers.CLIENT_BASIC_CONTEXT_KEY;
+import static ru.home.grpc.chat.server.utils.Headers.CLIENT_TOKEN_CONTEXT_KEY;
+import static ru.home.grpc.chat.server.utils.Headers.METADATA_KEY_CLIENT_TOKEN;
 
 
 // use from
@@ -27,141 +33,74 @@ public class HeaderInterceptor implements ServerInterceptor {
 
     private final static Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private static final String CLIENT_BASIC = "basic_auth";
-    private static final String CLIENT_TOKEN = "token_auth";
-
-    // header key basic auth
-    private static final Metadata.Key<String> METADATA_KEY_CLIENT_BASIC =
-        Metadata.Key.of(CLIENT_BASIC, ASCII_STRING_MARSHALLER);
-
-    // header key token auth
-    private static final Metadata.Key<String> METADATA_KEY_CLIENT_TOKEN =
-        Metadata.Key.of(CLIENT_TOKEN, ASCII_STRING_MARSHALLER);
-
-
-    // context key token auth
-    public static final Context.Key<Object> CLIENT_TOKEN_CONTEXT_KEY =
-        Context.key(CLIENT_TOKEN);
-
-    private ConcurrentMap<String, Client> clientList = ClientList.INSTANCE.clientList;
-
+    // Contains all current connected clients (singleton)
+    private Map<String, Client> clientList = ClientList.INSTANCE.clientList;
 
     /**
      *  Authenticate, using login/password or TOKEN
      */
     @Override
-    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
-        ServerCall<ReqT, RespT> call,
-        Metadata headers,
-        ServerCallHandler<ReqT, RespT> next) {
+    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call,
+                                                                 Metadata headers,
+                                                                 ServerCallHandler<ReqT, RespT> next) {
+
 
         boolean authenticated = false;
 
         log.info("incoming call: {}", headers.toString());
 
-        Credentials credentials = null;
+        Credentials credentials;
+        String token;
+        Context context = Context.current(); // like session bean
 
         // BASIC AUTH -------------------------------------------------
 
-        authenticated =
-            (credentials = Credentials.getCredentials(headers)) != null ||
-            (token = Credentials.getCredentials(headers)) != null
+        if ((credentials = Credentials.getCredentials(headers)) != null) {
 
+            //ToDo: implement authentication service that contains bcrypted passwords
+            // to compare with
 
+            // DEMO: Authenticate with any login and password=1
+            if (credentials.getPassword().equals("1")) {
+                authenticated = true;
 
+                // clear password
+                credentials.setPassword(null);
 
-        if (credentials!= null) {
+                // add basicAuth credentials to context
+                context = Context.current().withValue(CLIENT_BASIC_CONTEXT_KEY, credentials);
 
-            authenticated = true;
+            }
         }
 
         // TOKEN AUTH -------------------------------------------------
-        else {
 
+        if (!authenticated && (token = getClientToken(headers)) != null) {
+
+            if (clientList.containsKey(token)) {
+
+                authenticated = true;
+
+                // add token to context
+                context = Context.current().withValue(CLIENT_TOKEN_CONTEXT_KEY, token);
+            }
         }
 
-
-
-        String token = getClientToken(headers);
-
-        // add header value to context
-        Context context = Context.current().withValue(CLIENT_TOKEN_CONTEXT_KEY, identity);
-
-        String[] methodList = call.getMethodDescriptor().getFullMethodName().split("/");
-
-        if (methodList.length >=2) {
-
-            // get rpc method name
-            String method = methodList[1];
-
-            authenticated = method.equals("authenticate") || clientList.containsKey(identity);
-        }
-
-
-
-        // Only rpc "greet" allow anonymous access
+        // Authenticated user
         if (authenticated) {
+            log.info("Client authentication successful");
+            Assert.notNull(context, "context == null");
             return Contexts.interceptCall(context, call, headers, next);
         }
-        // Assume user not authenticated
+        // Not authenticated
         else {
             log.info("Client not authenticated");
-            call.close(Status.PERMISSION_DENIED.withDescription("invalid login/password"), new Metadata());
+            call.close(Status.UNAUTHENTICATED .withDescription("not authenticated"), new Metadata());
+            //call.close(Status.PERMISSION_DENIED.withDescription("not authenticated"), new Metadata.Trailers());
             //noinspection unchecked
             return new ServerCall.Listener() {};
         }
     }
-
-
-
-    private static class Credentials {
-
-        private String login;
-        private String password;
-
-        public Credentials(String login, String password) {
-            this.login = login;
-            this.password = password;
-        }
-
-        public String getLogin() {
-            return login;
-        }
-
-        public void setLogin(String login) {
-            this.login = login;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        public static Credentials getCredentials(Metadata headers) {
-
-            Credentials result = null;
-
-            String basicString = null;
-            if (headers.containsKey(METADATA_KEY_CLIENT_BASIC)) {
-                basicString = headers.get(METADATA_KEY_CLIENT_BASIC);
-                basicString = StringUtils.isEmpty(basicString) ? null : basicString;
-            }
-
-            if(basicString != null) {
-                String[] credentials = basicString.split(":");
-
-                if (credentials.length == 2) {
-                    result = new Credentials(credentials[0], credentials[1]);
-                }
-            }
-            return result;
-        }
-
-    }
-
 
 
     private String getClientToken(Metadata headers) {
@@ -178,3 +117,16 @@ public class HeaderInterceptor implements ServerInterceptor {
     }
 
 }
+
+
+
+/*
+        String[] methodList = call.getMethodDescriptor().getFullMethodName().split("/");
+        if (methodList.length >=2) {
+
+            // get rpc method name
+            String method = methodList[1];
+
+            authenticated = method.equals("authenticate") || clientList.containsKey(identity);
+        }
+ */

@@ -9,6 +9,7 @@ import java.io.*;
 import java.util.Scanner;
 
 @SpringBootApplication
+@EnableScheduling
 public class ChatClientApplication {
 
     private static BufferedReader bufferIn = new BufferedReader(new InputStreamReader(System.in));
