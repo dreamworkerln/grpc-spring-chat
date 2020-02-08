@@ -60,7 +60,7 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
         Client client = new Client(login, token);
         clientList.put(token, client);
 
-        log.info("Client '{}' has authenticated", login);
+        //log.info("Client '{}' has authenticated", login);
 
         AuthResponse response = AuthResponse.newBuilder()
             .setToken(token)
@@ -103,7 +103,7 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
             @Override
             public void onError(Throwable throwable) {
 
-                log.error("gRPC error: ", throwable);
+                log.debug("gRPC error: ", throwable);
 
                 Client client = getClient();
                 clientList.remove(client.getToken());

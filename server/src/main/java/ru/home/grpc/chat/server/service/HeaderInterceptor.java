@@ -8,16 +8,16 @@ import org.springframework.util.StringUtils;
 import ru.home.grpc.chat.server.entities.Client;
 import ru.home.grpc.chat.server.entities.ClientList;
 import ru.home.grpc.chat.server.utils.Credentials;
-import ru.home.grpc.chat.server.utils.Headers;
+
 
 import java.lang.invoke.MethodHandles;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Objects;
+import java.util.Set;
 
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
-import static ru.home.grpc.chat.server.utils.Headers.CLIENT_BASIC_CONTEXT_KEY;
-import static ru.home.grpc.chat.server.utils.Headers.CLIENT_TOKEN_CONTEXT_KEY;
-import static ru.home.grpc.chat.server.utils.Headers.METADATA_KEY_CLIENT_TOKEN;
+import static ru.home.grpc.chat.server.utils.Headers.*;
 
 
 // use from
@@ -43,11 +43,15 @@ public class HeaderInterceptor implements ServerInterceptor {
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call,
                                                                  Metadata headers,
                                                                  ServerCallHandler<ReqT, RespT> next) {
-
-
         boolean authenticated = false;
 
-        log.info("incoming call: {}", headers.toString());
+        String methodName = getMethodName(call);
+
+        // Comment out on release - reveal passwords
+        log.info("DISABLE ME ON PRODUCTION! Incoming call: {}, rpc: {}", headers, methodName);
+
+        // Will reduce performance, disable on production
+        // logIncomingCall(headers);
 
         Credentials credentials;
         String token;
@@ -56,6 +60,8 @@ public class HeaderInterceptor implements ServerInterceptor {
         // BASIC AUTH -------------------------------------------------
 
         if ((credentials = Credentials.getCredentials(headers)) != null) {
+
+            log.info("Authenticating client: '{}'", credentials.getLogin());
 
             //ToDo: implement authentication service that contains bcrypted passwords
             // to compare with
@@ -71,13 +77,15 @@ public class HeaderInterceptor implements ServerInterceptor {
                 context = Context.current().withValue(CLIENT_BASIC_CONTEXT_KEY, credentials);
 
             }
+
+            log.info("Client '{}' has authenticated", credentials.getLogin());
         }
 
         // TOKEN AUTH -------------------------------------------------
 
         if (!authenticated && (token = getClientToken(headers)) != null) {
 
-            if (clientList.containsKey(token)) {
+            if (clientList.get(token) != null) {
 
                 authenticated = true;
 
@@ -88,14 +96,13 @@ public class HeaderInterceptor implements ServerInterceptor {
 
         // Authenticated user
         if (authenticated) {
-            log.info("Client authentication successful");
             Assert.notNull(context, "context == null");
             return Contexts.interceptCall(context, call, headers, next);
         }
         // Not authenticated
         else {
             log.info("Client not authenticated");
-            call.close(Status.UNAUTHENTICATED .withDescription("not authenticated"), new Metadata());
+            call.close(Status.UNAUTHENTICATED .withDescription("Not authenticated"), new Metadata());
             //call.close(Status.PERMISSION_DENIED.withDescription("not authenticated"), new Metadata.Trailers());
             //noinspection unchecked
             return new ServerCall.Listener() {};
@@ -116,17 +123,41 @@ public class HeaderInterceptor implements ServerInterceptor {
         return result;
     }
 
-}
 
 
+    private <ReqT, RespT> void logIncomingCall(ServerCall<ReqT, RespT> call, Metadata headers) {
+        // cleanup passwords
+        Set<String> filteredKeys = new HashSet<>(headers.keys());
+        filteredKeys.removeIf(s -> s.equals(CLIENT_BASIC) || s.equals(CLIENT_TOKEN));
 
-/*
+        // ASCII_STRING_MARSHALLER only, no binary headers supported
+        StringBuilder sb = new StringBuilder("Metadata=(");
+        boolean fmt = false;
+        for (String key : filteredKeys) {
+            if (fmt) sb.append(","); else fmt = true; // formatting
+            sb.append(key).append("=");
+            Iterable<String> values = headers.getAll(Metadata.Key.of(key, ASCII_STRING_MARSHALLER));
+            for (String s : Objects.requireNonNull(values)) {
+                sb.append(s);
+            }
+        }
+        sb.append(')');
+
+        log.info("Incoming call: {}, rpc: {}", sb.toString(), getMethodName(call));
+    }
+
+    private <ReqT, RespT> String getMethodName(ServerCall<ReqT, RespT> call) {
+
+        String result = null;
+
         String[] methodList = call.getMethodDescriptor().getFullMethodName().split("/");
         if (methodList.length >=2) {
 
             // get rpc method name
-            String method = methodList[1];
-
-            authenticated = method.equals("authenticate") || clientList.containsKey(identity);
+            result = methodList[1];
         }
- */
+        return result;
+    }
+
+    // ----------------------------------------------------------------------------
+}

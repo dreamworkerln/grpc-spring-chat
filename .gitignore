@@ -32,3 +32,4 @@ build/
 
 ###############
 spring-shell.log
+/log**

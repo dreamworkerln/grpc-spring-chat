@@ -7,8 +7,8 @@ import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 
 public class Headers {
 
-    private static final String CLIENT_BASIC = "basic_auth";
-    private static final String CLIENT_TOKEN = "token_auth";
+    public static final String CLIENT_BASIC = "basic_auth";
+    public static final String CLIENT_TOKEN = "token_auth";
 
     // header key basic auth
     public static final Metadata.Key<String> METADATA_KEY_CLIENT_BASIC =

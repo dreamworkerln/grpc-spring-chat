@@ -54,7 +54,7 @@ public class ClientCommands implements ClientEvents {
     public void connect(@ShellOption(defaultValue = ShellOption.NULL)String host) {
 
 
-        String login = null;
+        String login;
         try {
 
 //            if(client.isConnected()) {
