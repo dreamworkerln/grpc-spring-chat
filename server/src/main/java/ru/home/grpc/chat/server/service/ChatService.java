@@ -139,7 +139,7 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
                 PingMessage pong = PingMessage.newBuilder()
                     .setAck(true)
                     .build();
-                log.debug("PING OUT ack:{}", pong.getAck());
+                log.trace("PING OUT ack:{}", pong.getAck());
                 responseObserver.onNext(pong);
             }
 
