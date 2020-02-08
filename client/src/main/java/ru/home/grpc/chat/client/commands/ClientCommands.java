@@ -269,7 +269,7 @@ public class ClientCommands implements ClientEvents {
 
         // Until user select correct host -----------------------------------
         while (true) {
-            String value = inputReader.prompt("Select host [N]: ");
+            String value = inputReader.prompt("Select host [Number]: ");
 
             try {
                 if((result = getHostByNumber(value))!= null) {
