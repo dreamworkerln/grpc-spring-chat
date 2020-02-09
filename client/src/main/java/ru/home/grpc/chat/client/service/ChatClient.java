@@ -94,7 +94,7 @@ public class ChatClient {
         channel = channelBuilder
             .keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)
             .keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)
-            .keepAliveWithoutCalls(false)
+            .keepAliveWithoutCalls(true)
             .build();
 
         // setup callbacks on channel state changes
@@ -122,15 +122,9 @@ public class ChatClient {
         // by authenticate yourself to server using login and password ------------------------------------------
         AuthRequest authRequest = AuthRequest.newBuilder().build();
 
-        AuthResponse response;
+        AuthResponse response = null;
 
         response = authStub.withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS).authenticate(authRequest);
-
-//        if (authResponseCode != 200) {
-//            shutdown();
-//            log.info("Server banned us: " + authResponseCode);
-//            throw new UnauthenticatedException("Server response code error: " + authResponseCode);
-//        }
 
         log.debug("Connected to server.");
 
@@ -257,13 +251,15 @@ public class ChatClient {
 
 
     // KEEPALIVE
-    @Scheduled(fixedDelay = 5000)
+    //@Scheduled(fixedDelay = 5000)
     public void keepAlive() {
 
         if (isOnline()) {
             ping();
         }
     }
+
+
 
     private void onStateChanged() {
 
@@ -287,6 +283,12 @@ public class ChatClient {
 
 
 
+
+//        if (authResponseCode != 200) {
+//            shutdown();
+//            log.info("Server banned us: " + authResponseCode);
+//            throw new UnauthenticatedException("Server response code error: " + authResponseCode);
+//
 
 
 

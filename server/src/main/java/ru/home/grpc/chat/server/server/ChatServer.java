@@ -60,7 +60,7 @@ public class ChatServer {
 
         server = NettyServerBuilder
             .forPort(port)
-            .permitKeepAliveWithoutCalls(false)
+            .permitKeepAliveWithoutCalls(true)
             .maxConnectionIdle(30, TimeUnit.SECONDS)
             .permitKeepAliveTime(5, TimeUnit.SECONDS)
             .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))

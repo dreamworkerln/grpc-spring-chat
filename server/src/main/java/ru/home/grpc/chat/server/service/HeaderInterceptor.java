@@ -76,9 +76,10 @@ public class HeaderInterceptor implements ServerInterceptor {
                 // add basicAuth credentials to context
                 context = Context.current().withValue(CLIENT_BASIC_CONTEXT_KEY, credentials);
 
+                log.info("Client '{}' has authenticated", credentials.getLogin());
             }
 
-            log.info("Client '{}' has authenticated", credentials.getLogin());
+
         }
 
         // TOKEN AUTH -------------------------------------------------
