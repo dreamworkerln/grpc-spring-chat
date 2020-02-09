@@ -50,7 +50,8 @@ asyncStub.withDeadlineAfter ?
 > But in short, you can't forcefully close a connection based on an RPC on server  
 https://github.com/grpc/grpc-java/issues/779
 ---
-&nbsp;
+&nbsp;  
+
 So not authenticated client will receive GOAWAY after several(4) ping.   
 Authenticated client may be connected to server as much as it wants.
 Both server and client detects disconnect   
