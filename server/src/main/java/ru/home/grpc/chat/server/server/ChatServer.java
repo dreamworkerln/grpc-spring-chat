@@ -23,6 +23,8 @@ import io.grpc.netty.NettyServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.home.grpc.chat.server.service.ChatService;
 import ru.home.grpc.chat.server.service.HeaderInterceptor;
@@ -40,31 +42,17 @@ import java.util.concurrent.TimeUnit;
 public class ChatServer {
     private final static Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    @Value("${grpc.server.port:8090}")
-    private final int port;
+    private static final int PERMIT_KEEP_ALIVE_TIME = 10;
+    private static final int MAX_CONNECTION_IDLE = 30;
+    private static final int KEEP_ALIVE_TIME = 10;
+    private static final int KEEP_ALIVE_TIMEOUT = 20;
 
-    private final Server server;
+    @Value("${grpc.server.port:8090}")
+    public Integer port;
+
+    private Server server;
 
     public ChatServer() throws Exception {
-
-        port = 8090;
-
-        // https://github.com/grpc/grpc-java/issues/779
-        // why implementing handmade keepalive
-        // "But in short, on server you can't forcefully close a connection based on an RPC"
-        // So going to kill idle unauthenticated connections using .maxConnectionIdle(...)
-        // Or unauthenticated clients will send to server keepalive requests forever
-        // this will happen when .permitKeepAliveWithoutCalls(true)
-        // But without built-in or manual keepalive tcp connection will die on
-        // NAT translation decay (idle TCP connection through NAT die in ~10 min)
-
-        server = NettyServerBuilder
-            .forPort(port)
-            .permitKeepAliveWithoutCalls(true)
-            .maxConnectionIdle(30, TimeUnit.SECONDS)
-            .permitKeepAliveTime(5, TimeUnit.SECONDS)
-            .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))
-            .build();
     }
 
 
@@ -90,14 +78,14 @@ public class ChatServer {
         }
     }
 
-    /**
-     * Await termination on the main thread since the grpc library uses daemon threads.
-     */
-    private void blockUntilShutdown() throws InterruptedException {
-        if (server != null) {
-            server.awaitTermination();
-        }
-    }
+//    /**
+//     * Await termination on the main thread since the grpc library uses daemon threads.
+//     */
+//    private void blockUntilShutdown() throws InterruptedException {
+//        if (server != null) {
+//            server.awaitTermination();
+//        }
+//    }
 
 
 
@@ -105,8 +93,27 @@ public class ChatServer {
 
 
     @PostConstruct
-    public void postConstruct() throws IOException {
-        this.start();
+    public void postConstruct() throws Exception {
+
+        // https://github.com/grpc/grpc-java/issues/779
+        // "But in short, on server you can't forcefully close a connection based on an RPC"
+        // So going to kill idle unauthenticated connections using .maxConnectionIdle(...)
+        // Or unauthenticated clients will send to server keepalive requests forever
+        // this will happen when .permitKeepAliveWithoutCalls(true) and .maxConnectionIdle(...) not set.
+        // Without keepalive tcp connection will die on NAT translation decay
+        // (idle TCP connection through NAT die in ~10 min)
+
+        server = NettyServerBuilder
+            .forPort(port)
+            .permitKeepAliveWithoutCalls(true)
+            .maxConnectionIdle(MAX_CONNECTION_IDLE, TimeUnit.SECONDS)
+            .keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)
+            .keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)
+            .permitKeepAliveTime(PERMIT_KEEP_ALIVE_TIME, TimeUnit.SECONDS)
+            .addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))
+            .build();
+
+        start();
     }
 
 
@@ -116,7 +123,6 @@ public class ChatServer {
         System.err.println("*** shutting down gRPC server since JVM is shutting down");
         ChatServer.this.stop();
         System.err.println("*** server shut down");
-
     }
 
 }

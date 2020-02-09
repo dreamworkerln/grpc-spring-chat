@@ -1,19 +1,17 @@
 package ru.home.grpc.chat.server.service;
 
 import com.google.protobuf.Timestamp;
-import io.grpc.stub.ClientCallStreamObserver;
-import io.grpc.stub.ClientResponseObserver;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.Assert;
 import ru.home.grpc.chat.*;
 import ru.home.grpc.chat.server.entities.Client;
 import ru.home.grpc.chat.server.entities.ClientList;
 import ru.home.grpc.chat.server.utils.Credentials;
 
-import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandles;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -78,8 +76,8 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
 
         Client client = getClient();
 
-        Assert.isNull(client.getResponseObserver(), "client.getResponseObserver() != null");
-        client.setResponseObserver(responseObserver);
+        Assert.isNull(client.getChatObserver(), "client.getChatObserver() != null");
+        client.setChatObserver(responseObserver);
 
         String msg = String.format("Client '%1$s' has entered the chat", client.getLogin());
         log.info(msg);
@@ -127,32 +125,6 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
         };
     }
 
-    @Override
-    public StreamObserver<PingMessage> ping(StreamObserver<PingMessage> responseObserver) {
-
-        return new StreamObserver<PingMessage>() {
-
-            @Override
-            public void onNext(PingMessage value) {
-
-                log.trace("PING IN ack:{}", value.getAck());
-                PingMessage pong = PingMessage.newBuilder()
-                    .setAck(true)
-                    .build();
-                log.trace("PING OUT ack:{}", pong.getAck());
-                responseObserver.onNext(pong);
-            }
-
-            @Override
-            public void onError(Throwable t) {}
-
-            @Override
-            public void onCompleted() {}
-        };
-
-
-    }
-
 
     // --------------------------------------------------------------------------------------
 
@@ -168,10 +140,10 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
 
                 Client client = entry.getValue();
 
-                if (client.getResponseObserver() == null) {
+                if (client.getChatObserver() == null) {
                     continue;
                 }
-                client.getResponseObserver().onNext(serverMessage);
+                client.getChatObserver().onNext(serverMessage);
             }
         }
         finally {
@@ -224,6 +196,12 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
                     Long.toString(secureRandom.nextLong());
 
         return new DigestUtils(SHA_256).digestAsHex(id);
+    }
+
+
+    @Scheduled(fixedDelay = 10000)
+    public void deleteEmptyAuthentications() {
+        clientList.entrySet().removeIf(entry -> entry.getValue().getChatObserver() == null);
     }
 
 

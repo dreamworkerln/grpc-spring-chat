@@ -22,43 +22,49 @@ shell:$ connect
   
 login:any  
 password:1  
-  
-### used:  
-  
+
 #### server:  
 NettyServerBuilder  
-&nbsp;&nbsp;&nbsp;&nbsp;.permitKeepAliveWithoutCalls(true)  
-&nbsp;&nbsp;&nbsp;&nbsp;.permitKeepAliveTime(5, TimeUnit.SECONDS)  
+&nbsp;&nbsp;&nbsp;&nbsp;.forPort(port)
+&nbsp;&nbsp;&nbsp;&nbsp;.permitKeepAliveWithoutCalls(true)
+&nbsp;&nbsp;&nbsp;&nbsp;.maxConnectionIdle(MAX_CONNECTION_IDLE, TimeUnit.SECONDS)
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)
+&nbsp;&nbsp;&nbsp;&nbsp;.permitKeepAliveTime(PERMIT_KEEP_ALIVE_TIME, TimeUnit.SECONDS)
+&nbsp;&nbsp;&nbsp;&nbsp;.addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor())) 
   
 authentication via login/password / token in message header  
   
   
   
 #### client:  
-channelBuilder  
-&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTime(10, TimeUnit.SECONDS)  
-&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTimeout(20, TimeUnit.SECONDS)  
-&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveWithoutCalls(true)  
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS) 
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS) 
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveWithoutCalls(true) 
   
 blockingStub.withDeadlineAfter(DEADLINE_DURATION, TimeUnit.MILLISECONDS)  
-  
+***  
+???
 dunno  
-asyncStub.withDeadlineAfter ?  
-  
-  
-### later  
-Later going to  
-&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveWithoutCalls(false)  
-and implement manual keepalive rpc (only for authenticated clients) because  
-if .keepAliveWithoutCalls(true) then unauthenticated clients can produce keepalive messages.  
-And you cannot kick client from server.  
-  
+asyncStub.withDeadlineAfter ?
 > But in short, you can't forcefully close a connection based on an RPC on server  
-https://github.com/grpc/grpc-java/issues/779  
+https://github.com/grpc/grpc-java/issues/779
+---
+&nbsp;
+So not authenticated client will receive GOAWAY after several(4) ping.   
+Authenticated client may be connected to server as much as it wants.
+Both server and client detects disconnect   
+(client being behind NAT, crashed client/server)   
+
+
+### materials:
+grpc-java  
+https://github.com/saturnism/grpc-by-example-java
+
+spring-shell  
+https://medium.com/agency04/developing-cli-application-with-spring-shell-part-2-4be6ce252678
+https://github.com/dmadunic/clidemo
   
   
-  
-  
-  
-  
+&nbsp;        
 ![GUI](https://i.ibb.co/KFtWgGk/2020-02-07-02-29-15.png)  

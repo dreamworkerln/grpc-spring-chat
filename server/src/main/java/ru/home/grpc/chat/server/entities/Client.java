@@ -9,19 +9,19 @@ public class Client {
     String login;
     String token;
 
-    StreamObserver<ServerMessage> responseObserver;
+    StreamObserver<ServerMessage> chatObserver;
 
     public Client(String login, String token) {
         this.login = login;
         this.token = token;
     }
 
-    public StreamObserver<ServerMessage> getResponseObserver() {
-        return responseObserver;
+    public StreamObserver<ServerMessage> getChatObserver() {
+        return chatObserver;
     }
 
-    public void setResponseObserver(StreamObserver<ServerMessage> responseObserver) {
-        this.responseObserver = responseObserver;
+    public void setChatObserver(StreamObserver<ServerMessage> chatObserver) {
+        this.chatObserver = chatObserver;
     }
 
     public String getLogin() {

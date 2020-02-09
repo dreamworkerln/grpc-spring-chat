@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import ru.home.grpc.chat.*;
 import ru.home.grpc.chat.client.commands.ClientEvents;
-import ru.home.grpc.chat.client.utils.UnauthenticatedException;
 
 import java.lang.invoke.MethodHandles;
 import java.nio.file.AccessDeniedException;
@@ -62,9 +61,7 @@ public class ChatClient {
     private ConnectivityState lastState;
     private ChatServiceGrpc.ChatServiceBlockingStub authStub;
     private ChatServiceGrpc.ChatServiceStub chatStub;
-    private ChatServiceGrpc.ChatServiceStub pingStub;
     private StreamObserver<ClientMessage> chatObserver;
-    private StreamObserver<PingMessage> pingObserver;
 
     private String login;
     private String password;
@@ -78,19 +75,15 @@ public class ChatClient {
     }
 
 
-    public void connect(String host, int port, String login, String password) throws AccessDeniedException {
+    public void connect(String host, int port, String login, String password) {
         this.login = login;
         this.password = password;
 
         connect(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
     }
 
-    // .keepAliveWithoutCalls(true) allow TCP connection survive NAT translation decay dropping
-    // will implement handmade keepalive due to auth problems - see comments on server
-    // (unauthenticated clients will allowed to produce keepalive ping)
-
     // Construct client for accessing Chat server using the existing channel.
-    protected void connect(ManagedChannelBuilder<?> channelBuilder) throws AccessDeniedException {
+    protected void connect(ManagedChannelBuilder<?> channelBuilder) {
         channel = channelBuilder
             .keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)
             .keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)
@@ -161,29 +154,6 @@ public class ChatClient {
             }
         });
 
-
-        // KeepAlive handmade ping  ---------------------------------------------------
-
-        pingStub = ChatServiceGrpc.newStub(channel);
-        pingStub = addAsyncStubHeader(pingStub, token);
-
-        pingObserver = pingStub.ping(new StreamObserver<PingMessage>() {
-            @Override
-            public void onNext(PingMessage value) {
-                log.trace("PING IN ack:{}", value.getAck());
-            }
-
-            @Override
-            public void onError(Throwable t) {
-
-            }
-
-            @Override
-            public void onCompleted() {
-
-            }
-        });
-
         // should set in last line or scheduled keepAlive(checking authenticated) may fail
         authenticated = true;
     }
@@ -204,14 +174,6 @@ public class ChatClient {
         chatObserver.onNext(ClientMessage.newBuilder()
             .setMessage(message)
             .build());
-    }
-
-    private void ping() {
-        PingMessage ping = PingMessage.newBuilder()
-            .setAck(false)
-            .build();
-        log.trace("PING OUT ack:{}", ping.getAck());
-        pingObserver.onNext(ping);
     }
 
     public void shutdown() {
@@ -249,18 +211,6 @@ public class ChatClient {
         return MetadataUtils.attachHeaders(stub, headers);
     }
 
-
-    // KEEPALIVE
-    //@Scheduled(fixedDelay = 5000)
-    public void keepAlive() {
-
-        if (isOnline()) {
-            ping();
-        }
-    }
-
-
-
     private void onStateChanged() {
 
         ConnectivityState currentState = channel.getState(false);
@@ -280,6 +230,11 @@ public class ChatClient {
         lastState = state;
         channel.notifyWhenStateChanged(state, this::onStateChanged);
     }
+
+
+
+
+}
 
 
 
@@ -304,4 +259,3 @@ public class ChatClient {
 //        return headers;
 //    }
 
-}

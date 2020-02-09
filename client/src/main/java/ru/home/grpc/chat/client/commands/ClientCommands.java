@@ -109,7 +109,7 @@ public class ClientCommands implements ClientEvents {
 
         if(!client.isOnline()) {
 
-            //client.shutdown();
+            client.shutdown();
             return;
         }
 

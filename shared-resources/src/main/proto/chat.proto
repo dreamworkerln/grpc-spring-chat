@@ -25,10 +25,6 @@ package ru.home.grpc.chat;
 
 message AuthRequest {}
 
-// yea, handmade keepalive
-message PingMessage{
-    bool ack = 1;
-}
 
 message AuthResponse {
   string token = 1;
@@ -46,6 +42,5 @@ message ServerMessage {
 
 service ChatService {
   rpc authenticate(AuthRequest) returns (AuthResponse);
-  rpc ping(stream PingMessage) returns (stream PingMessage);
   rpc chat(stream ClientMessage) returns (stream ServerMessage);
 }
