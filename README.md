@@ -25,22 +25,22 @@ password:1
 
 #### server:  
 NettyServerBuilder  
-&nbsp;&nbsp;&nbsp;&nbsp;.forPort(port)
-&nbsp;&nbsp;&nbsp;&nbsp;.permitKeepAliveWithoutCalls(true)
-&nbsp;&nbsp;&nbsp;&nbsp;.maxConnectionIdle(MAX_CONNECTION_IDLE, TimeUnit.SECONDS)
-&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)
-&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)
-&nbsp;&nbsp;&nbsp;&nbsp;.permitKeepAliveTime(PERMIT_KEEP_ALIVE_TIME, TimeUnit.SECONDS)
-&nbsp;&nbsp;&nbsp;&nbsp;.addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor())) 
+&nbsp;&nbsp;&nbsp;&nbsp;.forPort(port)  
+&nbsp;&nbsp;&nbsp;&nbsp;.permitKeepAliveWithoutCalls(true)  
+&nbsp;&nbsp;&nbsp;&nbsp;.maxConnectionIdle(MAX_CONNECTION_IDLE, TimeUnit.SECONDS)  
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)  
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)  
+&nbsp;&nbsp;&nbsp;&nbsp;.permitKeepAliveTime(PERMIT_KEEP_ALIVE_TIME, TimeUnit.SECONDS)  
+&nbsp;&nbsp;&nbsp;&nbsp;.addService(ServerInterceptors.intercept(new ChatService(), new HeaderInterceptor()))  
   
 authentication via login/password / token in message header  
   
   
   
 #### client:  
-&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS) 
-&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS) 
-&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveWithoutCalls(true) 
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)  
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)  
+&nbsp;&nbsp;&nbsp;&nbsp;.keepAliveWithoutCalls(true)  
   
 blockingStub.withDeadlineAfter(DEADLINE_DURATION, TimeUnit.MILLISECONDS)  
 ***  
