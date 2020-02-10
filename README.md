@@ -61,12 +61,15 @@ client will periodicaly try to reconnect using built-in algorithm
 
 ### materials:
 grpc-java  
+https://www.youtube.com/watch?v=xpmFhTMqWhc
+https://www.youtube.com/watch?v=BOW7jd136Ok
 https://github.com/saturnism/grpc-by-example-java  
 
 spring-shell  
 https://medium.com/agency04/developing-cli-application-with-spring-shell-part-2-4be6ce252678  
 https://github.com/dmadunic/clidemo  
   
-  
+
+
 &nbsp;        
 ![GUI](https://i.ibb.co/KFtWgGk/2020-02-07-02-29-15.png)  
