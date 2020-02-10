@@ -60,9 +60,10 @@ client will periodicaly try to reconnect using built-in algorithm
 
 
 ### materials:
-grpc-java  
+grpc-java by Ray Tsang
 https://www.youtube.com/watch?v=xpmFhTMqWhc  
 https://www.youtube.com/watch?v=BOW7jd136Ok  
+his grpc-java examples
 https://github.com/saturnism/grpc-by-example-java    
 
 spring-shell  
