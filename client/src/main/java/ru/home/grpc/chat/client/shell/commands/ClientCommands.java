@@ -1,10 +1,13 @@
-package ru.home.grpc.chat.client.commands;
+package ru.home.grpc.chat.client.shell.commands;
 
+import io.grpc.ConnectivityState;
 import io.grpc.StatusRuntimeException;
 import org.jline.reader.UserInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -18,7 +21,6 @@ import ru.home.grpc.chat.client.utils.UnauthenticatedException;
 import javax.annotation.PostConstruct;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,9 +35,11 @@ public class ClientCommands implements ClientEvents {
     private InputReader inputReader;
     private ChatClient client;
 
-    String padding;
+    //private String padding;
+    private Map<Integer,URI> hostList;
 
-    Map<Integer,URI> hostList;
+    private boolean interrupted;
+
 
     @Autowired
     public void setShellHelper(ShellHelper shellHelper) {
@@ -53,18 +57,11 @@ public class ClientCommands implements ClientEvents {
     @ShellMethod("Connect to server.")
     public void connect(@ShellOption(defaultValue = ShellOption.NULL)String host) {
 
-
         String login;
+        String password;
+        URI server;
+
         try {
-
-//            if(client.isConnected()) {
-//                shellHelper.printWarning("Already connected");
-//                return;
-//            }
-
-
-            URI server;
-
             server = getHostByNumber(host);
 
             if (server == null) {
@@ -78,14 +75,22 @@ public class ClientCommands implements ClientEvents {
 
             // get login/password -------------------------------------------------
 
-            login = inputReader.prompt("login: ");
-            String password = inputReader.prompt("password: ", "secret", false);
+            login = "1";
+            password ="1";
 
-            // Synchronous connecting - authenticate ------------------------------------------
+            login = inputReader.prompt("login: ");
+            password = inputReader.prompt("password: ", "secret", false);
+
+
+
+            // Synchronous connecting  ------------------------------------------
 
             shellHelper.printInfo("Connecting to server " + printURI(server));
-            client.connect(server.getHost(), server.getPort(), login, password);
-            
+
+            client.init(server.getHost(), server.getPort(), login, password);
+
+            client.connect();
+
         }
         // handling gRPC Errors
         catch (StatusRuntimeException e) {
@@ -99,6 +104,7 @@ public class ClientCommands implements ClientEvents {
         // handling Ctrl+C
         catch (UserInterruptException e) {
             System.out.println("^C");
+            interrupted = true;
         }
         // ?????
         catch (Exception e) {
@@ -108,8 +114,8 @@ public class ClientCommands implements ClientEvents {
         // exit chat if have errors ---------------------------------------------------------------
 
         if(!client.isOnline()) {
-
-            client.shutdown();
+            interrupted = false;
+            client.shutdownNow();
             return;
         }
 
@@ -121,36 +127,84 @@ public class ClientCommands implements ClientEvents {
 
         // Async chatting -------------------------------------------------------------------
         try {
-            while (client.isOnline()) {
+
+            StringBuilder undelivered = new StringBuilder();
+
+            while (true) {
                 String message = inputReader.prompt();
-                client.sendMessage(message);
+
+                if (client.isOnline()) {
+
+                    if(undelivered.length() > 0) {
+                        // send undelivered messages
+                        client.sendMessage(undelivered.toString());
+                        undelivered.setLength(0);
+                    }
+                    // send current message
+                    client.sendMessage(message);
+                }
+                else {
+                    // keep undelivered message
+                    undelivered.append(message).append("\n");
+                }
             }
         }
         // handling gRPC Errors
         catch (StatusRuntimeException e){
-            System.out.println("ОПАОПАОПА ОПА ОПА ОПА ОПА ОПА ОПА ОПА ОПА!!!!");
+            System.out.println("ОПАОПАОПА ОПА ОПА ОПА ОПА ОПА ОПА ОПА ПА ПА!!!");
             shellHelper.printError(e.getStatus().getCode().name());
             log.error("gRPC error", e);
         }
         // handling Ctrl+C
         catch (UserInterruptException e){
             System.out.println("^C");
+            interrupted = true;
         }
         catch (Exception e) {
             log.error("gRPC error", e);
         }
         finally {
-            client.shutdown();
+            client.shutdownNow();
         }
     }
 
     // -------------------------------------------------------------
 
 
-    @ShellMethod("Disconnect from server.")
-    public void disconnect() throws InterruptedException {
-        client.shutdown();
+//    @ShellMethod("Disconnect from server.")
+//    public void disconnect() throws InterruptedException {
+//        client.shutdown();
+//    }
+
+
+    @Override
+    public void onMessage(ServerMessage message)  {
+        System.out.println(message.getFrom() + ": " + message.getMessage());
     }
+
+
+    @Override
+    public void onError(Throwable t) {
+
+        if (t instanceof StatusRuntimeException && !interrupted) {
+            shellHelper.printError(((StatusRuntimeException)t).getStatus().getCode().name());
+        }
+    }
+
+//    @Override
+//    public void onReconnect() {
+//        shellHelper.printInfo("Reconnecting to server ... " + printURI(server));
+//    }
+
+
+    @Override
+    public void onStateChanged(ConnectivityState previous, ConnectivityState current) {
+
+    }
+
+
+
+
 
 
 
@@ -158,6 +212,7 @@ public class ClientCommands implements ClientEvents {
     @PostConstruct
     protected void postConstruct() {
 
+        // Fill hosts list
         Map<Integer,String> tmp = new HashMap<>();
         tmp.put(1, "localhost");
         tmp.put(2, "ya.ru");
@@ -172,52 +227,10 @@ public class ClientCommands implements ClientEvents {
 
 
 
-
-    @Override
-    public void onMessage(ServerMessage message)  {
-        System.out.println(message.getFrom() + ": " + message.getMessage());
-    }
-
-    @Override
-    public void onInfo(String message) {
-        log.info(message);
-    }
-
-    @Override
-    public void onError(Throwable t) {
-
-        if (t instanceof StatusRuntimeException) {
-            shellHelper.printError(((StatusRuntimeException)t).getStatus().getCode().name());
-        }
-        log.debug("gRPC error", t);
-    }
-
-    @Override
-    public void onOpen(String message) {
-
-    }
-
-    @Override
-    public void onClose() {
-        System.out.println("Disconnected");
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
     // ===========================================================================================
 
 
-    private URI getHostByNumber(String value) throws URISyntaxException {
+    private URI getHostByNumber(String value) {
 
         URI result = null;
 
@@ -232,7 +245,7 @@ public class ClientCommands implements ClientEvents {
 
 
 
-    private URI getHostByString(String host) throws URISyntaxException {
+    private URI getHostByString(String host) {
 
 
 
@@ -263,7 +276,7 @@ public class ClientCommands implements ClientEvents {
         for (Map.Entry<Integer, URI> entry : hostList.entrySet()) {
             shellHelper.printInfo(
                 entry.getKey() + " - " +
-                entry.getValue().getHost() + ":" + entry.getValue().getPort());
+                    entry.getValue().getHost() + ":" + entry.getValue().getPort());
         }
 
 

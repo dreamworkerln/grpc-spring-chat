@@ -1,0 +1,60 @@
+package ru.home.grpc.chat.client.shell.commands;
+
+import org.jline.builtins.ssh.ShellCommand;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.shell.Bootstrap;
+import org.springframework.shell.core.CommandResult;
+import org.springframework.shell.core.JLineShellComponent;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.geekbrains.dreamworkerln.spring2.shell_lib.shell.ShellHelper;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
+//@SpringBootTest(classes = {
+//    ClientCommands.class,
+//    ShellHelper.class
+//})
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
+public class ShellIntegrationTest {
+
+    private static JLineShellComponent shell;
+
+    @BeforeAll
+    static void startUp() throws InterruptedException {
+        Bootstrap bootstrap = new Bootstrap();
+        shell = bootstrap.getJLineShellComponent();
+    }
+
+    @AfterAll
+    static void shutdown() {
+        shell.stop();
+    }
+
+    public static JLineShellComponent getShell() {
+        return shell;
+    }
+
+
+    @Test
+    void connect_localhost() {
+        shell.executeCommand("connect localhost:8090");
+    }
+
+
+
+    @Configuration
+    @ComponentScan({"ru.home.grpc.chat.client.**", "ru.geekbrains.dreamworkerln.spring2.shell_lib.**"})
+    public static class SpringConfig {
+
+    }
+
+}

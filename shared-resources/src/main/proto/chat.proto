@@ -23,6 +23,10 @@ option objc_class_prefix = "RTG";
 
 package ru.home.grpc.chat;
 
+message Ping {
+    bool ack = 1;
+}
+
 message AuthRequest {}
 
 
@@ -41,6 +45,7 @@ message ServerMessage {
 }
 
 service ChatService {
-  rpc authenticate(AuthRequest) returns (AuthResponse);
+  rpc ping (Ping) returns (Ping);
+  rpc authenticate (AuthRequest) returns (AuthResponse);
   rpc chat(stream ClientMessage) returns (stream ServerMessage);
 }

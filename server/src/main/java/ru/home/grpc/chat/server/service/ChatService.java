@@ -44,6 +44,19 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
     }
 
 
+    // ----------------------------------------------------------------------------
+
+
+    @Override
+    public void ping(Ping request, StreamObserver<Ping> responseObserver) {
+
+        Ping response = Ping.newBuilder().setAck(true).build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    // ----------------------------------------------------------------------------
+
     @Override
     public void authenticate(AuthRequest request, StreamObserver<AuthResponse> responseObserver) {
 

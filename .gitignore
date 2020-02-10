@@ -30,6 +30,6 @@ build/
 ### VS Code ###
 .vscode/
 
-###############
-spring-shell.log
-/log**
+####### logs ########
+*.log
+*.gz
