@@ -54,8 +54,9 @@ https://github.com/grpc/grpc-java/issues/779
 
 So not authenticated client will receive GOAWAY after several(4) ping.   
 Authenticated client may be connected to server as much as it wants.  
-Both server and client detects disconnect   
-(client being behind NAT, crashed client/server)   
+Both server and client detects disconnect, 
+client will periodicaly try to reconnect using built-in algorithm  
+(client being behind NAT, crashed client/server)  
 
 
 ### materials:
