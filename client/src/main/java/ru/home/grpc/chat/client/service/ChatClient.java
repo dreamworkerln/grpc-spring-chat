@@ -24,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import ru.home.grpc.chat.*;
@@ -32,6 +31,8 @@ import ru.home.grpc.chat.client.shell.commands.ClientEvents;
 
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 
@@ -45,7 +46,7 @@ public class ChatClient {
     private static final String CLIENT_BASIC = "basic_auth";
     private static final String CLIENT_TOKEN = "token_auth";
 
-    public static final int DEADLINE_DURATION = 5;
+    public static final int DEADLINE_DURATION = 5*100;
     public static final int KEEP_ALIVE_TIME = 10;
     public static final int KEEP_ALIVE_TIMEOUT = 20;
 
@@ -57,10 +58,16 @@ public class ChatClient {
     private ClientEvents clientEvents;
 
     private ManagedChannel channel;
-    private ConnectivityState currentState;
-    private ConnectivityState previousState;
+    private ConnectivityState currentState = ConnectivityState.SHUTDOWN;
+    private ConnectivityState previousState = ConnectivityState.SHUTDOWN;
+
+    // without authentication headers
+    private ChatServiceGrpc.ChatServiceBlockingStub pingStub;
+    // with basic auth
     private ChatServiceGrpc.ChatServiceBlockingStub blockingStub;
+    // with token auth
     private ChatServiceGrpc.ChatServiceStub asyncStub;
+
     private StreamObserver<ClientMessage> chatObserver;
 
     private String login;
@@ -68,9 +75,14 @@ public class ChatClient {
     private String host;
     private int    port;
 
-    private boolean authenticated;
+    // client is connected to server (currentState == ConnectivityState.READY)
     private boolean ready;
+    // client is authenticated to server
+    private boolean authenticated;
+    // client should reconnect if connection failed
     private boolean shouldBeOnline;
+    // if reconnecting now
+    private AtomicBoolean reconnectPending = new AtomicBoolean();
 
     @Autowired
     public void setApplicationEventPublisher(ClientEvents clientEvents) {
@@ -84,90 +96,108 @@ public class ChatClient {
         this.password = password;
         this.host = host;
         this.port = port;
-
-        buildChannel();
     }
 
 
+    /**
+     * Connect to grpc server and authenticate yourself
+     */
     public void connect() {
 
-        Assert.notNull(channel, "Call init(...) first");
+        //Assert.notNull(channel, "Call init(...) first");
 
-        // re-create channel
-        if(channel.isShutdown() || channel.isTerminated()) {
+        try {
+
+            // get channel ready
             buildChannel();
+
+            // init flags
+            authenticated = false;
+            shouldBeOnline = false;
+
+
+            //channel.resetConnectBackoff();
+
+            // setup callbacks on channel currentState changes
+            setupStateHandlers();
+
+            // will no auth header assigned
+            pingStub = ChatServiceGrpc.newBlockingStub(channel);
+
+            blockingStub = ChatServiceGrpc.newBlockingStub(channel);
+            asyncStub = ChatServiceGrpc.newStub(channel);
+
+            // adding basicAuth header
+            blockingStub = addBlockingStubHeader(blockingStub, login + ":" + password);
+
+            // Ping server before authenticating -----------------------------------------------------------------
+
+            // Will not repeat because if server is unavailable
+            // ping throw exception and client is shutdownNow()
+            if(!ready) {
+                log.debug("Ping server");
+                ping();
+            }
+
+            // Authenticate yourself to server using login and password ------------------------------------------
+
+
+            log.debug("Authenticating to server");
+
+            AuthRequest authRequest = AuthRequest.newBuilder().build();
+
+            // getting client id (access token, moar handy stuff)
+            AuthResponse response = blockingStub.withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS).authenticate(authRequest);
+
+            log.debug("Connected to server");
+
+            // Assign token to asyncStub header -------------------------------------------------------------------
+
+            String token = response.getToken();
+            Assert.isTrue(!StringUtils.isBlank(token), "token is null");
+
+            asyncStub = addAsyncStubHeader(asyncStub, token);
+
+            // Dunno howto use deadline on asyncStub
+            // chatObserver = asyncStub.withDeadlineAfter(10000, TimeUnit.MILLISECONDS)
+            //     .chatObserver(new StreamObserver<ServerMessage>() {
+            // Prepare to async chatting -----------------------------------------------------------------------------
+
+
+            chatObserver = asyncStub.chat(new StreamObserver<ServerMessage>() {
+
+                @Override
+                public void onNext(ServerMessage reply) {
+                    clientEvents.onMessage(reply);
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    log.debug("gRPC error", t);
+                    clientEvents.onError(t);
+                }
+
+                @Override
+                public void onCompleted() {
+                }
+            });
+
+            // set on only after all commands performed
+            // or will get racing with onStateChanged()
+            authenticated = true;
+            shouldBeOnline = true;
+
+            // Glitch fix, channel sometimes need moar time to change its state.
+            // and you may complete authentication (perform rpc) here with connection.state = IDLE
+            // So if you then call isOnline() you will get false.
+            // Fixing this by setting manually
+            ready = true;
         }
-
-        authenticated = false;
-
-        //channel.resetConnectBackoff();
-
-        // setup callbacks on channel currentState changes
-        setupStateHandlers();
-
-
-//        Close previous observer (if exists) is that required?
-//        if (chatObserver != null) {
-//            try {
-//                chatObserver.onCompleted();
-//            }
-//            catch (Exception ignore){}
-//        }
-
-        blockingStub = ChatServiceGrpc.newBlockingStub(channel);
-        asyncStub = ChatServiceGrpc.newStub(channel);
-
-        // adding basicAuth header
-        blockingStub = addBlockingStubHeader(blockingStub, login + ":" + password);
-
-        // getting client id (access token, etc)
-        // by authenticate yourself to server using login and password ------------------------------------------
-
-        log.debug("Authenticating to server");
-
-        AuthRequest authRequest = AuthRequest.newBuilder().build();
-
-        AuthResponse response = blockingStub.withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS).authenticate(authRequest);
-
-        log.debug("Connected to server");
-
-        // Assign token to asyncStub -----------------------------------------------------------------------------
-
-        // add token to asyncStub header
-        String token = response.getToken();
-        Assert.isTrue(!StringUtils.isBlank(token), "token is null");
-
-        asyncStub = addAsyncStubHeader(asyncStub, token);
-
-        // Dunno howto use deadline on asyncStub
-        // chatObserver = asyncStub.withDeadlineAfter(10000, TimeUnit.MILLISECONDS)
-        //     .chatObserver(new StreamObserver<ServerMessage>() {
-        // Prepare to async chatting -----------------------------------------------------------------------------
-
-
-        chatObserver = asyncStub.chat(new StreamObserver<ServerMessage>() {
-
-            @Override
-            public void onNext(ServerMessage reply) {
-                clientEvents.onMessage(reply);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                log.debug("gRPC error", t);
-                clientEvents.onError(t);
-            }
-
-            @Override
-            public void onCompleted() {}
-        });
-
-        // only after all commands ow will get racing with onStateChanged()
-        authenticated = true;
-        shouldBeOnline = true;
-        ready = true;
-        // glitch fix, websarvar sometimes need moar time to change its state.
-        // and you complete authentication her with state = IDLE
+        catch (Exception e) {
+            // something bad happened, closing client
+            shutdownNow();
+            throw e;
+        }
     }
 
 
@@ -193,18 +223,27 @@ public class ChatClient {
 
         log.debug("Shutdown called");
 
-//
 //        for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
 //            System.out.println(ste);
 //        }
 
+        ready = false;
+        authenticated = false;
         shouldBeOnline = false;
-        if(channel!=null) {
+
+        if(channel==null) {
+            return;
+        }
+
+        if(!channel.isTerminated()) {
             channel.shutdownNow();
         }
     }
 
 
+    /**
+     * return is client connected and authenticated to server
+     */
     public boolean isOnline() {
 
         //System.out.println("ready:" + ready);
@@ -213,8 +252,31 @@ public class ChatClient {
         return ready && authenticated;
     }
 
-    // -----------------------------------------------------------------------------
+    // ==========================================================================
 
+
+
+    /**
+     * Activate onStateChanged() connection state change handler
+     */
+    private void setupStateHandlers() {
+
+
+        previousState = currentState;
+
+        // Имеет тенденцию тормозить, соответственно нельзя полагаться
+        // что onStateChanged сработает сразу, как изменится состояние подключения
+
+        // Одинрочный взвод, после срабатывания отваливается и требует повторного заряжания
+        // gRPC dev-team think that is ok
+        channel.notifyWhenStateChanged(currentState, this::onStateChanged);
+    }
+
+
+    /**
+     * Handle connection state changes<br>
+     *
+     */
     private void onStateChanged() {
 
         currentState = channel.getState(false);
@@ -222,12 +284,16 @@ public class ChatClient {
         log.debug("CHANNEL STATE CHANGED: {} -> {}", previousState, currentState);
 
         ready = currentState == ConnectivityState.READY;
-        if (currentState != ConnectivityState.READY) {authenticated = false;}
+
+        // drop authenticated flag if needed
+        if (currentState != ConnectivityState.READY) {
+            authenticated = false;
+        }
 
         // check needs to reconnect
-        handleState();
+        checkNeedToReconnect();
 
-        // handle state changing
+        // handle state changing on client
         clientEvents.onStateChanged(previousState, currentState);
 
         // re-apply notifyWhenStateChanged due to it registers a one-off callback
@@ -235,38 +301,87 @@ public class ChatClient {
     }
 
 
+    /**
+     * Perform checkNeedToReconnect to server if needed
+     */
+    private void checkNeedToReconnect() {
 
-    private void handleState() {
+        if (!shouldBeOnline) {
+            return;
+        }
 
-        if (currentState == ConnectivityState.IDLE) {
-            log.debug("Trying to reconnect - ping server");
 
-            // will start gRPC built-in reconnection mechanism (use any rpc call to initiate it)
+//        AtomicReference<Integer> ii = new AtomicReference<>();
+//
+//        ii.updateAndGet()
+//
+//        // ai.updateAndGet(value -> value < threadInt ? threadInt : value);
+//
+//        reconnectPending.compareAndSet(currentState == ConnectivityState.IDLE &&
+//                                       reconnectPending.get(), true);
+//
+//
+//
+//
+//        if ( &&
+//            !reconnectPending.get()) {
+
+
+
+        // if client is down - wake it up and try to connect to server
+        // (using grpc built-in auto-reconnect mechanism)
+        if (currentState == ConnectivityState.IDLE &&
+            reconnectPending.compareAndSet(false, true)) {
+
+            log.debug("Trying to reconnect - pinging server");
+
             try {
-                Ping ping = Ping.newBuilder().setAck(false).build();
-                blockingStub.withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS).ping(ping);
+                // Will repeat in background ping request till server up and response
+                // (build-in grpc retry/reconnect mechanism)
+                ping();
             }
             catch (StatusRuntimeException e){
                 log.debug("Server not responding");
             }
         }
-        else if (currentState == ConnectivityState.READY) {
 
-            // finally, channel connected again - need to re-authenticate or server will kick us
-            if (shouldBeOnline && !authenticated) {
-                log.debug("Reconnected, re-authenticating");
+        // Well, finally we connected to the server, so we need to authenticate yourself,
+        // otherwise we will be kicked out by server
+        else if (currentState == ConnectivityState.READY && !authenticated) {
 
-                try {
-                    connect();
-                }
-                catch (StatusRuntimeException e){
-                    log.debug("Authentication failed");
-                }
+            reconnectPending.set(false);
+            log.debug("Server up, re-authenticating");
 
+            try {
+                connect();
+            }
+            catch (StatusRuntimeException e){
+                log.debug("Authentication failed");
             }
         }
-
     }
+
+
+    private void ping() {
+
+        // this ping request will start built-in grpc
+        // retry/reconnect mechanism (perform any rpc call to start/initiate it)
+        // it will try to perform rpc with increasing time interval on unsuccessful attempt
+        try {
+            Ping ping = Ping.newBuilder().setAck(false).build();
+            //noinspection ResultOfMethodCallIgnored
+            pingStub.withDeadlineAfter(DEADLINE_DURATION, TimeUnit.SECONDS).ping(ping);
+        }
+        catch (StatusRuntimeException e) {
+            //log.debug("grpc error: ", e);
+
+            // re-raise that server is unavailable
+            if (e.getStatus().getCode() == Status.UNAVAILABLE.getCode()) {
+                throw e;
+            }
+        }
+    }
+
 
     // =============================================================================
 
@@ -290,29 +405,20 @@ public class ChatClient {
         return MetadataUtils.attachHeaders(stub, headers);
     }
 
-    private void setupStateHandlers() {
 
-        // stub to avoid NullPointerException
-        if (currentState == null) {
-            currentState = channel.getState(false);
-        }
-        previousState = currentState;
-
-        channel.notifyWhenStateChanged(currentState, this::onStateChanged);
-    }
-
-
+    // Rebuild if needed
     private void buildChannel() {
 
-        shouldBeOnline = false;
-        //shutdownNow();
-        
-        // build channel
-        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext()
-            .keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)
-            .keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)
-            .keepAliveWithoutCalls(true)
-            .build();
+        // re-create channel
+        if (channel == null ||
+            channel.isShutdown() || channel.isTerminated()) {
+
+            channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext()
+                .keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)
+                .keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)
+                .keepAliveWithoutCalls(true)
+                .build();
+        }
     }
 
 

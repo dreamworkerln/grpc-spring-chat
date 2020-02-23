@@ -23,6 +23,7 @@ option objc_class_prefix = "RTG";
 
 package ru.home.grpc.chat;
 
+// Used to ping remote peer when connection has broken down
 message Ping {
     bool ack = 1;
 }

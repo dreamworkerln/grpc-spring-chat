@@ -115,7 +115,7 @@ public class ClientCommands implements ClientEvents {
 
         if(!client.isOnline()) {
             interrupted = false;
-            client.shutdownNow();
+            //client.shutdownNow();
             return;
         }
 
@@ -130,6 +130,7 @@ public class ClientCommands implements ClientEvents {
 
             StringBuilder undelivered = new StringBuilder();
 
+            //noinspection InfiniteLoopStatement
             while (true) {
                 String message = inputReader.prompt();
 
