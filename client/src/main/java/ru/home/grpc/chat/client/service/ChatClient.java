@@ -118,8 +118,6 @@ public class ChatClient {
 
             //channel.resetConnectBackoff();
 
-            // setup callbacks on channel currentState changes
-            setupStateHandlers();
 
             // will no auth header assigned
             pingStub = ChatServiceGrpc.newBlockingStub(channel);
@@ -310,28 +308,9 @@ public class ChatClient {
             return;
         }
 
-
-//        AtomicReference<Integer> ii = new AtomicReference<>();
-//
-//        ii.updateAndGet()
-//
-//        // ai.updateAndGet(value -> value < threadInt ? threadInt : value);
-//
-//        reconnectPending.compareAndSet(currentState == ConnectivityState.IDLE &&
-//                                       reconnectPending.get(), true);
-//
-//
-//
-//
-//        if ( &&
-//            !reconnectPending.get()) {
-
-
-
         // if client is down - wake it up and try to connect to server
         // (using grpc built-in auto-reconnect mechanism)
-        if (currentState == ConnectivityState.IDLE &&
-            reconnectPending.compareAndSet(false, true)) {
+        if (currentState == ConnectivityState.IDLE ) {
 
             log.debug("Trying to reconnect - pinging server");
 
@@ -418,6 +397,9 @@ public class ChatClient {
                 .keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)
                 .keepAliveWithoutCalls(true)
                 .build();
+
+            // setup callbacks on channel currentState changes
+            setupStateHandlers();
         }
     }
 
