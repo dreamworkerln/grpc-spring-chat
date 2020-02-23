@@ -37,6 +37,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 
 
+// java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -Dspring.profiles.active=dev -jar grpc-chat-client-0.0.1.jar
+
 /**
  * Sample client code that makes gRPC calls to the server.
  */
@@ -402,12 +404,6 @@ public class ChatClient {
             setupStateHandlers();
         }
     }
-
-
-
-
-
-
 }
 
 
