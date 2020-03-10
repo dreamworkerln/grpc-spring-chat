@@ -13,6 +13,8 @@ import java.lang.invoke.MethodHandles;
 @EnableScheduling
 public class ChatServerApplication {
 
+    // -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=7005 -Dcom.sun.management.jmxremote.port=7006 -Dcom.sun.management.jmxremote.rmi.port=7006 -Dcom.sun.management.jmxremote.local.only=true -Dcom.sun.management.jmxremote.host=localhost -Dcom.sun.management.jmxremote.authenticate=false -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false
+
     private final static Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public static void main(String[] args) {

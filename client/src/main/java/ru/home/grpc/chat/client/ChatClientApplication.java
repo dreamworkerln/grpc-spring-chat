@@ -31,9 +31,7 @@ public class ChatClientApplication {
         //System.out.println("FAKEIT !!!!");
     }
 
-
     public static void main(String[] args) {
-
         SpringApplication.run(ChatClientApplication.class, args);
     }
 
