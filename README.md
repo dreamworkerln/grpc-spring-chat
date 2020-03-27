@@ -19,8 +19,8 @@ For Intellij Idea after mvn compile mark folder (in Project)
 "grpc-spring-chat/shared-resources/target/generated-sources" as "Generated Sources Root"  
   
 ### 3. run server and client
-```
 in client console run  
+```
 shell:$ connect  
   
 login:any  
