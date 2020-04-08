@@ -394,6 +394,9 @@ public class ChatClient {
         if (channel == null ||
             channel.isShutdown() || channel.isTerminated()) {
 
+            // without using TLS specify usePlaintext(),
+            // with TLS DO NOT usePlaintext()
+
             channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext()
                 .keepAliveTime(KEEP_ALIVE_TIME, TimeUnit.SECONDS)
                 .keepAliveTimeout(KEEP_ALIVE_TIMEOUT, TimeUnit.SECONDS)
